@@ -8,5 +8,4 @@ urlpatterns = [
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^pdapp/', include('pdapp.urls')),
-    url(r'^docs/', include('rest_framework_swagger.urls')),
 ]
