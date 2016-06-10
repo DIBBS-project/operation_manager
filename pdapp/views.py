@@ -68,6 +68,10 @@ class ExecutionViewSet(viewsets.ModelViewSet):
         script = get_bash_script(record, ret.archive_url, files, fileneames)
         print (script)
 
+        # Save in the database
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+
+        # Call Mr Cluster
+
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
