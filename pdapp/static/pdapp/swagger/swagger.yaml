@@ -1,0 +1,362 @@
+swagger: '2.0'
+info:
+  title: Process Dispatcher API
+  description: Execute processes with the Process Dispatcher API.
+  version: "0.1"
+# the domain of the service
+host: 127.0.0.1:8001
+# array of all schemes that your API supports
+schemes:
+# TODO: Change to HTTPS when not on localhost!
+  - http
+# will be prefixed to all paths
+basePath: /pdapp
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: Authorization
+    in: header
+  basic:
+    type: basic
+paths:
+  /exec/:
+    get:
+      summary: Get the list of all the executions registered.
+      description: |
+        Get the list of all the executions registered. No authentification is required.
+      tags:
+        - Executions
+      responses:
+        200:
+          description: An array of executions
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Exec'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add a new execution.
+      description: |
+        Add a new execution. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+      
+      parameters:
+        - name: data
+          in: body
+          description: Execution
+          required: true
+          schema:
+            $ref: '#/definitions/ExecPost'
+      tags:
+        - Executions
+      responses:
+        201:
+          description: The newly created execution
+          schema:
+            $ref: '#/definitions/Exec'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /exec/{id}/:
+    get:
+      summary: Get a single execution.
+      description: |
+        Get a single execution. Authentification is required.
+      parameters:
+        - name: id
+          in: path
+          description: Id of the execution
+          required: true
+          type: integer
+          minimum: 0
+      tags:
+        - Executions
+      responses:
+        200:
+          description: The execution matching the given Id
+          schema:
+            $ref: '#/definitions/Exec'
+        404:
+          description: No execution with the given Id
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary: Redefine an already existing execution.
+      description: |
+        Redefine an already existing execution. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+      
+      parameters:
+        - name: id
+          in: path
+          description: Id of the execution
+          required: true
+          type: integer
+          minimum: 0
+        - name: data
+          in: body
+          description: Execution
+          required: true
+          schema:
+            $ref: '#/definitions/ExecPost'
+      tags:
+        - Executions
+      responses:
+        200:
+          description: The updated execution
+          schema:
+            $ref: '#/definitions/Exec'
+        404:
+          description: No execution with the given Id
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Modify an already existing execution.
+      description: |
+        Modify an already existing execution. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+      
+      parameters:
+        - name: id
+          in: path
+          description: Id of the execution
+          required: true
+          type: integer
+          minimum: 0
+        - name: data
+          in: body
+          description: Execution
+          required: true
+          schema:
+            $ref: '#/definitions/ExecPatch'
+      tags:
+        - Executions
+      responses:
+        200:
+          description: The updated execution
+          schema:
+            $ref: '#/definitions/Exec'
+        404:
+          description: No execution with the given Id
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete an already existing execution.
+      description: |
+        Delete an already existing execution. Authentification is required.
+      parameters:
+        - name: id
+          in: path
+          description: Id of the execution
+          required: true
+          type: integer
+          minimum: 0
+      security:
+        - basic: []
+        - api_key: []
+      tags:
+        - Executions
+      responses:
+        204:
+          description: Execution correctly deleted
+        404:
+          description: No execution with the given Id
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /users/:
+    get:
+      summary: Get the list of all the users.
+      description: |
+        Get the list of all the users. No authentification is required.
+      tags:
+        - Users
+      responses:
+        200:
+          description: An array of users
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /users/{id}/:
+    get:
+      summary: Get a single user.
+      description: |
+        Get a single user. No authentification is required.
+      parameters:
+        - name: id
+          in: path
+          description: Id of the user
+          required: true
+          type: integer
+          minimum: 0
+      tags:
+        - Users
+      responses:
+        200:
+          description: The user matching the given Id
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: No user with the given Id
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api-token-auth/:
+    post:
+      summary: Get the authentification token for a user.
+      description: |
+        Get the authentification token for a user by providing his username and password. No authentification is required; however the credentials of the user are part of the request.
+      parameters:
+        - name: data
+          in: body
+          description: User credentials
+          required: true
+          schema:
+            $ref: '#/definitions/Credentials'
+      tags:
+        - Users
+      responses:
+        200:
+          description: The authentification token of the user
+          schema:
+            $ref: '#/definitions/TokenResp'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Exec:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique identifier representing a specific execution
+      author:
+        type: integer
+        description: Unique ID of the user who created the execution
+      process_id:
+        type: integer
+        description: Unique ID of the appliance on which the process must be run
+      parameters:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping a value for each parameter expected by the process
+      files:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping each file expected by the process to a URL
+      callback_url:
+        type: string
+        description: URL called after completion of the job
+      output_location:
+        type: string
+        description: Location of the output file of the job on the machine, empty if not yet completed
+      date:
+        type: dateTime
+        description: Date and time of creation of the execution
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique identifier representing a specific user
+      username:
+        type: string
+        description: Name given to the user.
+      process_definitions:
+        type: array
+        description: Array of IDs of all the process descriptions created by the user
+        items:
+          type: integer
+      definition:
+        type: string
+        description: JSON-formatted string containing all the information required to start the process
+  Error:
+    type: object
+    properties:
+      detail:
+        type: string
+  TokenResp:
+    type: object
+    properties:
+      token:
+        type: string
+  Credentials:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        description: Username of the user
+        type: string
+      password:
+        description: Password of the user
+        type: string
+  ExecPost:
+    type: object
+    required:
+      - process_id
+      - parameters
+      - files
+      - callback_url
+    properties:
+      process_id:
+        type: integer
+        description: Unique ID of the appliance on which the process must be run
+      parameters:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping each parameter expected by the process to a value
+      files:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping each file expected by the process to a URL
+      callback_url:
+        type: string
+        description: URL called after completion of the job
+  ProcessDefPatch:
+    type: object
+    properties:
+      process_id:
+        type: integer
+        description: Unique ID of the appliance on which the process must be run
+      parameters:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping a value for each parameter expected by the process
+      callback_url:
+        type: string
+        description: URL called after completion of the job
