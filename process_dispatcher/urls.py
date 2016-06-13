@@ -8,4 +8,6 @@ urlpatterns = [
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^pdapp/', include('pdapp.urls')),
+    url(r'^demo/', include('demo.urls')),
+    url(r'^$', include('pdapp.urls')),
 ]

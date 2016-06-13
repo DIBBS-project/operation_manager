@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class ExecutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Execution
-        fields = ('id', 'author', 'process_id', 'parameters', 'files', 'callback_url', 'output_location', 'date')
+        fields = ('id', 'author', 'process_id', 'parameters', 'files', 'callback_url', 'output_location', 'date', 'status', 'status_info')
 
 
 class UserSerializer(serializers.ModelSerializer):

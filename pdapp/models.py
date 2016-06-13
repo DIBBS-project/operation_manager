@@ -19,8 +19,8 @@ class Execution(models.Model):
     callback_url = models.CharField(max_length=2048)
     output_location = models.CharField(max_length=2048, blank=True, default='', editable=False)
     date = models.DateTimeField(auto_now_add=True)
-
-
+    status = models.CharField(max_length=2048, blank=True)
+    status_info = models.CharField(max_length=2048, blank=True)
 
     @property
     def __str__(self):
