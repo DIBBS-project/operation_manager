@@ -17,6 +17,7 @@ class Execution(models.Model):
     parameters = JSONField()
     files = JSONField()
     callback_url = models.CharField(max_length=2048)
+    mrcluster_token = models.CharField(max_length=128)
     output_location = models.CharField(max_length=2048, blank=True, default='', editable=False)
     date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=2048, blank=True)

@@ -59,7 +59,10 @@ class ExecutionViewSet(viewsets.ModelViewSet):
         from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
         import json
 
-        data2 = request.data
+        # data2 = request.data
+        data2 = {}
+        for key in request.data:
+            data2[key] = request.data[key]
         data2[u'author'] = request.user.id
         serializer = self.get_serializer(data=data2)
         serializer.is_valid(raise_exception=True)
