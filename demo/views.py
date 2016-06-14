@@ -13,6 +13,12 @@ def get_appliance(appliance_id):
 # Index that provides a description of the API
 def index(request):
 
+    return render(request, "index.html", {})
+
+
+# Index that provides a description of the API
+def executions(request):
+
     tuples = []
 
     executions = models.Execution.objects.all()
@@ -25,7 +31,7 @@ def index(request):
         }
         tuples += [tuple]
 
-    return render(request, "index.html", {"tuples": tuples})
+    return render(request, "executions.html", {"tuples": tuples})
 
 
 def show_details(request, pk):

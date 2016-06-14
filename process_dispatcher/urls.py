@@ -1,5 +1,6 @@
 from django.conf.urls import include, url
 from django.contrib import admin
+import demo.views as demo_views
 
 urlpatterns = [
     # Examples:
@@ -10,4 +11,6 @@ urlpatterns = [
     url(r'^pdapp/', include('pdapp.urls')),
     url(r'^demo/', include('demo.urls')),
     url(r'^', include('pdapp.urls')),
+    url(r'^executions/', demo_views.executions),
+    url(r'^$', include('pdapp.urls')),
 ]
