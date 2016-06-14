@@ -21,48 +21,87 @@
     <meta name="generator" content="Org-mode"/>
     <meta name="author" content="Jonathan"/>
     <style type="text/css">
+        .iframe_mister_cluster {
+            width: 100%;
+            height: 200px;
+            padding: 5px;
+            border: 0px;
+        }
+        #content {
+            padding: 20px;
+        }
     </style>
     <script type="text/javascript">
-        window.setTimeout(function() {
-            location.reload()
-        }, 5000)
+{#        window.setTimeout(function() {#}
+{#            location.reload()#}
+{#        }, 5000)#}
     </script>
 </head>
 <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Streaming demo</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
 <div id="content">
-    <table class="table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Process</th>
-            <th>Appliance</th>
-            <th>Info</th>
-            <th>Status</th>
-            <th>Result</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for tuple in tuples %}
-            <tr>
-                <td><a href="{% url 'execution_details' tuple.execution.id %}">Execution {{ tuple.execution.id }}</a></td>
-                <td>{{ tuple.process.name }} ({{ tuple.process.id }})</td>
-                <td>{{ tuple.appliance.name }} ({{ tuple.appliance.infrastructure }})</td>
-                <td>
-                    {% if tuple.execution.status_info != "" %}
-                    {{ tuple.execution.status_info }}
-                    {% else %}
-                        -
-                    {% endif %}</td>
-                <td>{{ tuple.execution.status }}</td>
-                <td>
-                    {% if tuple.execution.output_location != "" %}
-                    <a href="{{ tuple.execution.output_location }}" class="btn btn-default">View result</a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+
+    <br/>
+    <br/>
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-lg-12">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Mister Cluster - Appliances</h3>
+              </div>
+              <div class="panel-body">
+                  <iframe class="iframe_mister_cluster" src="http://localhost:8002/_appliances/"></iframe>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-lg-12">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Mister Cluster - Users</h3>
+              </div>
+              <div class="panel-body">
+                  <iframe class="iframe_mister_cluster" src="http://localhost:8002/_users/"></iframe>
+              </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-lg-12">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Process Dispatcher</h3>
+              </div>
+              <div class="panel-body">
+                  <iframe class="iframe_mister_cluster" src="http://localhost:8001/executions/"></iframe>
+              </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
