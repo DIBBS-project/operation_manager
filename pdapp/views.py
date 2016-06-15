@@ -90,8 +90,9 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 
         # Call Mr Cluster
         def deploy_cluster(execution, cluster_id=None):
+
             headers = {
-                "TOKEN": MISTER_CLUSTER_TOKEN
+                "TOKEN": execution.mrcluster_token
             }
 
             if cluster_id is None:
