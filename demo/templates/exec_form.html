@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <title>Demo - Create Execution</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous"></script>
+    <!-- 2016-03-24 Thu 11:21 -->
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta name="generator" content="Org-mode"/>
+    <meta name="author" content="Maverick"/>
+    <style type="text/css">
+    </style>
+</head>
+<body>
+<div id="content">
+    <h1>Create Execution</h1>
+    <form role="form" action="/pdapp/exec/" method="post">
+        <div class="form-group">
+            <label for="mrcluster_token">Mr Cluster Token:</label>
+            <input type="text" class="form-control" id="mrcluster_token" name="mrcluster_token" required>
+        </div>
+        <div class="form-group">
+            <label for="process_id">Process ID:</label>
+            <input type="number" class="form-control" id="process_id" name="process_id" required>
+        </div>
+        <div class="form-group">
+            <label for="parameters">Parameters (JSON dictionary):</label>
+            <textarea class="form-control" rows="5" cols="50" id="parameters" name="parameters" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="files">Files (JSON dictionary):</label>
+            <textarea class="form-control" rows="5" cols="50" id="files" name="files" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="callback_url">Callback URL:</label>
+            <input type="url" class="form-control" id="callback_url" name="callback_url" required>
+        name
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+</div>
+</body>
+</html>

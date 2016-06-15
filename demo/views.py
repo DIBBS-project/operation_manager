@@ -45,3 +45,7 @@ def show_details(request, pk):
     }
 
     return render(request, "tuple.html", {"tuple": tuple})
+
+
+def create_execution(request):
+    return render(request, "exec_form.html")

@@ -283,6 +283,9 @@ definitions:
       callback_url:
         type: string
         description: URL called after completion of the job
+      mrcluster_token:
+        type: string
+        description: Token for Mr Cluster
       output_location:
         type: string
         description: Location of the output file of the job on the machine, empty if not yet completed
@@ -335,6 +338,7 @@ definitions:
       - parameters
       - files
       - callback_url
+      - mrcluster_token
     properties:
       process_id:
         type: integer
@@ -348,7 +352,10 @@ definitions:
       callback_url:
         type: string
         description: URL called after completion of the job
-  ProcessDefPatch:
+      mrcluster_token:
+        type: string
+        description: Token for Mr Cluster
+  ExecPatch:
     type: object
     properties:
       process_id:
@@ -356,7 +363,13 @@ definitions:
         description: Unique ID of the appliance on which the process must be run
       parameters:
         type: string
-        description: JSON-formatted string containing a dictionary mapping a value for each parameter expected by the process
+        description: JSON-formatted string containing a dictionary mapping each parameter expected by the process to a value
+      files:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping each file expected by the process to a URL
       callback_url:
         type: string
         description: URL called after completion of the job
+      mrcluster_token:
+        type: string
+        description: Token for Mr Cluster
