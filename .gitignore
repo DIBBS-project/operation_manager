@@ -1,6 +1,7 @@
 # PROJECT
 tmp
 .idea
+db.sqlite3
 
 # MAC OS
 
