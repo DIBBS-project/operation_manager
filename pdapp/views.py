@@ -18,7 +18,7 @@ import logging
 import os
 
 MISTER_CLUSTER_URL = "http://127.0.0.1:8002"
-MISTER_CLUSTER_TOKEN = "09940fde-e170-481e-b7ba-d2cfea730c75"
+MISTER_CLUSTER_TOKEN = "849fcb45-f666-4642-8c8b-f16973fb29fa"
 
 logging.basicConfig(level=logging.INFO)
 

@@ -12,5 +12,4 @@ urlpatterns = [
     url(r'^demo/', include('demo.urls')),
     url(r'^', include('pdapp.urls')),
     url(r'^executions/', demo_views.executions),
-    url(r'^$', include('pdapp.urls')),
 ]
