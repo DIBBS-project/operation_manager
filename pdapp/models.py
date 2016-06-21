@@ -23,10 +23,6 @@ class Execution(models.Model):
     status = models.CharField(max_length=2048, blank=True)
     status_info = models.CharField(max_length=2048, blank=True)
 
-    @property
-    def __str__(self):
-        return self.name
-
 
 # Add a token upon user creation
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

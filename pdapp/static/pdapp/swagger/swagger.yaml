@@ -292,45 +292,12 @@ definitions:
       date:
         type: dateTime
         description: Date and time of creation of the execution
-  User:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: Unique identifier representing a specific user
-      username:
+      status:
         type: string
-        description: Name given to the user.
-      process_definitions:
-        type: array
-        description: Array of IDs of all the process descriptions created by the user
-        items:
-          type: integer
-      definition:
+        description: Status of the cluster
+      status_info:
         type: string
-        description: JSON-formatted string containing all the information required to start the process
-  Error:
-    type: object
-    properties:
-      detail:
-        type: string
-  TokenResp:
-    type: object
-    properties:
-      token:
-        type: string
-  Credentials:
-    type: object
-    required:
-      - username
-      - password
-    properties:
-      username:
-        description: Username of the user
-        type: string
-      password:
-        description: Password of the user
-        type: string
+        description: More information about the status of the cluster
   ExecPost:
     type: object
     required:
@@ -373,3 +340,42 @@ definitions:
       mrcluster_token:
         type: string
         description: Token for Mr Cluster
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique identifier representing a specific user
+      username:
+        type: string
+        description: Name given to the user.
+      process_definitions:
+        type: array
+        description: Array of IDs of all the process descriptions created by the user
+        items:
+          type: integer
+      definition:
+        type: string
+        description: JSON-formatted string containing all the information required to start the process
+  Error:
+    type: object
+    properties:
+      detail:
+        type: string
+  TokenResp:
+    type: object
+    properties:
+      token:
+        type: string
+  Credentials:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        description: Username of the user
+        type: string
+      password:
+        description: Password of the user
+        type: string
