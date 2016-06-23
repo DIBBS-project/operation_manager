@@ -105,7 +105,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
                 execution.save()
 
                 logging.info("creating the logical cluster")
-                cluster_creation_data = {"user_id": "1","site_id": "1", "software_id": appliance_id, "name": "MyHadoopCluster"}
+                cluster_creation_data = {"user_id": "1","site_id": "1", "software": appliance_id, "name": "MyHadoopCluster"}
                 r = requests.post('%s/clusters/' % (MISTER_CLUSTER_URL), data=json.dumps(cluster_creation_data), headers=headers)
 
                 response = json.loads(r.content)

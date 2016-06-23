@@ -24,17 +24,21 @@
     <!-- 2016-03-24 Thu 11:21 -->
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <meta name="generator" content="Org-mode"/>
-    <meta name="author" content="Jonathan"/>
+    <meta name="author" content="Jonathan, Maverick"/>
     <style type="text/css">
         .iframe_mister_cluster {
             width: 100%;
-            height: 180px;
+            height: 268px;
             padding: 5px;
             border: 0px;
         }
         #content {
             padding: 20px;
             margin-top: 10px;
+        }
+
+        .panel-body {
+            padding: 0;
         }
 
     </style>
@@ -67,7 +71,7 @@
               </li>
               <li>
                   <p class="navbar-btn" style="margin-left: 10px">
-                      <a href="/demo/exec_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default">New execution</a>
+                      <a href="//127.0.0.1:8001/demo/exec_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default">New execution</a>
                 </p>
               </li>
           </ul>
@@ -84,10 +88,10 @@
         <div class="col-xs-6 col-sm-6 col-lg-6">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Mister Cluster - Appliances</h3>
+                <h3 class="panel-title">Process Registry</h3>
               </div>
               <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="http://127.0.0.1:8002/_appliances/"></iframe>
+                  <iframe class="iframe_mister_cluster" src="//127.0.0.1:8000/demo/processes/"></iframe>
               </div>
             </div>
         </div>
@@ -95,10 +99,10 @@
         <div class="col-xs-6 col-sm-6 col-lg-6">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Mister Cluster - Users</h3>
+                <h3 class="panel-title">Process Dispatcher</h3>
               </div>
               <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="http://127.0.0.1:8002/_users/"></iframe>
+                  <iframe class="iframe_mister_cluster" src="//127.0.0.1:8001/demo/executions/"></iframe>
               </div>
             </div>
         </div>
@@ -109,20 +113,20 @@
         <div class="col-xs-6 col-sm-6 col-lg-6">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Process Registry</h3>
+                <h3 class="panel-title">Appliance Registry</h3>
               </div>
               <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="http://127.0.0.1:8000/demo/processes/"></iframe>
+                  <iframe class="iframe_mister_cluster" src="//127.0.0.1:8003/demo/appliances/"></iframe>
               </div>
             </div>
         </div>
         <div class="col-xs-6 col-sm-6 col-lg-6">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Process Dispatcher</h3>
+                <h3 class="panel-title">Resource Provisioner</h3>
               </div>
               <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="http://127.0.0.1:8001/demo/executions/"></iframe>
+                  <iframe class="iframe_mister_cluster" src="//127.0.0.1:8002/demo/users/"></iframe>
               </div>
             </div>
         </div>
