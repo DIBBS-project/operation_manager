@@ -5,7 +5,7 @@ set -x
 PROCESS_REGISTRY_URL="http://127.0.0.1:8000"
 PROCESS_DISPATCHER_URL="http://127.0.0.1:8001"
 MISTER_CLUSTER_URL="http://127.0.0.1:8002"
-CALLBACK_URL="http://requestb.in/1ajj2571"
+CALLBACK_URL="http://requestb.in/1mstk8z1"
 
 echo "Testing the streaming architecture"
 

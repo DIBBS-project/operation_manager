@@ -72,7 +72,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
         ret = ProcessDefinitionsApi().processdef_id_get(id=process_id)
 
         # Get all the required information
-        appliance_id = ret.appliance_id
+        appliance = ret.appliance
         record = json.loads(ret.adapters)
         parameters = json.loads(data2[u'parameters'])
         files = json.loads(data2[u'files'])
@@ -105,7 +105,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
                 execution.save()
 
                 logging.info("creating the logical cluster")
-                cluster_creation_data = {"user_id": "1","site_id": "1", "software": appliance_id, "name": "MyHadoopCluster"}
+                cluster_creation_data = {"user_id": "1","site_id": "1", "software": appliance, "name": "MyHadoopCluster"}
                 r = requests.post('%s/clusters/' % (MISTER_CLUSTER_URL), data=json.dumps(cluster_creation_data), headers=headers)
 
                 response = json.loads(r.content)
