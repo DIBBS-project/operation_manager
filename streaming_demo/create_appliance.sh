@@ -1,10 +1,14 @@
 #!/bin/bash
 
-set -x
+# set -x
 
 PROCESS_REGISTRY_URL="http://127.0.0.1:8000"
 PROCESS_DISPATCHER_URL="http://127.0.0.1:8001"
 MISTER_CLUSTER_URL="http://127.0.0.1:8002"
+
+RESOURCE_MANAGER_URL="http://127.0.0.1:8002"
+APPLIANCE_REGISTRY_URL="http://127.0.0.1:8003"
+
 CALLBACK_URL="http://requestb.in/1ajj2571"
 
 echo "Testing the streaming architecture"
@@ -23,62 +27,81 @@ function extract_id {
     echo "$RESULT"
 }
 
+
 ########################################################
-# CREATION OF AN APPLIANCE
+# CREATION OF ACTIONS
 ########################################################
 
-USER="jpastor"
-PASSWORD="bar"
-PROJECT="FG-392"
 
-function extract_cluster_id {
-
-    RESULT=$(echo $1 | sed 's/.*"cluster_id"://g' | sed 's/,.*//g' | sed 's/}//g')
-
-    echo "$RESULT"
+if [ "$1" != "skip" ]; then
+    read -r -d '' ACTION_JSON_VALUE <<- EOM
+{
+  "name": "configure_node"
 }
+EOM
+    ACTION_REGISTRATION_OUTPUT=$(curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$ACTION_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/actions/")
 
-function extract_user_id {
-
-    RESULT=$(echo $1 | sed 's/.*"user_id"://g' | sed 's/,.*//g' | sed 's/}//g')
-
-    echo "$RESULT"
+    read -r -d '' ACTION_JSON_VALUE <<- EOM
+{
+  "name": "prepare_node"
 }
+EOM
+    ACTION_REGISTRATION_OUTPUT=$(curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$ACTION_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/actions/")
 
-function extract_api_token {
-
-    RESULT=$(echo $1 | sed 's/.*"api_token"://g' | sed 's/,.*//g' | sed 's/}//g')
-
-    echo "$RESULT"
+    read -r -d '' ACTION_JSON_VALUE <<- EOM
+{
+  "name": "update_master_node"
 }
+EOM
+    ACTION_REGISTRATION_OUTPUT=$(curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$ACTION_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/actions/")
 
-# Create a new user
-USER_CREATION_OUTPUT=$(curl -H "Content-Type: application/json" -X POST -d "{\"username\": \"$USER\", \"project\": \"$PROJECT\", \"password\": \"$PASSWORD\"}" $MISTER_CLUSTER_URL/users/)
-USER_ID=$(extract_user_id $USER_CREATION_OUTPUT)
-TOKEN=$(extract_api_token $USER_CREATION_OUTPUT)
+    read -r -d '' ACTION_JSON_VALUE <<- EOM
+{
+  "name": "user_data"
+}
+EOM
+    ACTION_REGISTRATION_OUTPUT=$(curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$ACTION_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/actions/")
 
-# Upload openstack password in an encrypted way
-USER_GET_OUTPUT=$(curl -H "TOKEN: $TOKEN" -X GET $MISTER_CLUSTER_URL/users/$USER_ID/)
-echo "$USER_GET_OUTPUT" | sed 's/.*"security_certificate":"//g' | sed 's/"}//g' | awk '{gsub(/\\n/,"\n")}1' > certificate.txt
+    read -r -d '' ACTION_JSON_VALUE <<- EOM
+{
+  "name": "update_hosts_file"
+}
+EOM
+    ACTION_REGISTRATION_OUTPUT=$(curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$ACTION_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/actions/")
+fi
 
-set +x
 
-echo "Please enter your OpenStack Password: "
-read -sr OS_PASSWORD_INPUT
+########################################################
+# CREATION OF THE APPLIANCES
+########################################################
 
-echo "$OS_PASSWORD_INPUT" > password.txt
-cat password.txt | openssl rsautl -encrypt -pubin -inkey certificate.txt > cipher.txt
-rm -rf password.txt
+for FOLDER in appliances/*; do
+    APPLIANCE_NAME=$(echo $FOLDER | sed 's/.*\///g' | sed 's/\..*//g')
+    read -r -d '' APPLIANCE_JSON_VALUE <<- EOM
+{
+  "name": "${APPLIANCE_NAME}"
+}
+EOM
+    curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$APPLIANCE_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/appliances/"
 
-echo "=========== encrypted(password) ==========="
-cat cipher.txt
-echo "==========================================="
+    for FILE in $FOLDER/*; do
+        ACTION_NAME=$(echo $FILE | sed 's/.*\///g' | sed 's/\..*//g')
+        ESCAPED_CONTENT=$(cat $FILE | sed 's/"/\\\"/g' | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g')
+        # CONTENT=$(cat $FILE)
+        # ESCAPED_CONTENT=$(printf '%q' $CONTENT)
 
-set -x
-
-# Send the encrypted password to the webservice
-curl -i -H "TOKEN: $TOKEN" -X PATCH -F 'data=@cipher.txt' $MISTER_CLUSTER_URL/users/$USER_ID/
-
-echo "MRCLUSTER_TOKEN: $TOKEN"
+        read -r -d '' SCRIPT_JSON_VALUE <<- EOM
+{
+  "code": "${ESCAPED_CONTENT}",
+  "appliance": "${APPLIANCE_NAME}",
+  "action": "${ACTION_NAME}"
+}
+EOM
+        echo "============================================"
+        echo "$SCRIPT_JSON_VALUE"
+        echo "============================================"
+        curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$SCRIPT_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/scripts/"
+    done
+done
 
 exit 0
