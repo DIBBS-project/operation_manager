@@ -5,6 +5,6 @@ cat > hosts <<- EOM
 {% for host in hosts %}
 {{ host["floating_ip"] }}  {{ host["name"] }}
 {% endfor %}
-#127.0.0.1	{{ node_name }} {{ node_name }}.novalocal
+#127.0.0.1  {{ node_name }} {{ node_name }}.novalocal
 EOM
 sudo cp hosts /etc/hosts
