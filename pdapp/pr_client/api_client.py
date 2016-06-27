@@ -19,7 +19,7 @@ Copyright 2016 SmartBear Software
 """
 
 from __future__ import absolute_import
-from . import models as swagger_models
+from . import models
 from .rest import RESTClientObject
 from .rest import ApiException
 
@@ -271,7 +271,7 @@ class ApiClient(object):
                 klass = eval(klass)
             # for model types
             else:
-                klass = eval('swagger_models.' + klass)
+                klass = eval('models.' + klass)
 
         if klass in [int, float, str, bool]:
             return self.__deserialize_primitive(data, klass)

@@ -289,8 +289,9 @@ definitions:
       output_location:
         type: string
         description: Location of the output file of the job on the machine, empty if not yet completed
-      date:
-        type: dateTime
+      creation_date:
+        type: string
+        format: date-time
         description: Date and time of creation of the execution
       status:
         type: string

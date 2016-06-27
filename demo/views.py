@@ -1,6 +1,6 @@
 from django.shortcuts import render
 import pdapp.models as models
-from pdapp.prapp_client.apis import ProcessDefinitionsApi
+from pdapp.pr_client.apis import ProcessDefinitionsApi
 
 
 def get_appliance(appliance_id):
@@ -27,7 +27,7 @@ def executions(request):
         tuple = {
             "execution": execution,
             "process": ret,
-            "appliance": get_appliance(ret.appliance_id)
+            "appliance": get_appliance(ret.appliance)
         }
         tuples += [tuple]
 

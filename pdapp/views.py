@@ -22,6 +22,7 @@ MISTER_CLUSTER_TOKEN = "849fcb45-f666-4642-8c8b-f16973fb29fa"
 
 logging.basicConfig(level=logging.INFO)
 
+
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
@@ -36,7 +37,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
 
 
 class ExecutionViewSet(viewsets.ModelViewSet):
@@ -55,7 +55,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
     # Override to set the user of the request using the credentials provided to perform the request.
     def create(self, request, *args, **kwargs):
 
-        from prapp_client.apis import ProcessDefinitionsApi
+        from pr_client.apis import ProcessDefinitionsApi
         from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
         import json
 
@@ -105,8 +105,12 @@ class ExecutionViewSet(viewsets.ModelViewSet):
                 execution.save()
 
                 logging.info("creating the logical cluster")
-                cluster_creation_data = {"user_id": "1","site_id": "1", "software": appliance, "name": "MyHadoopCluster"}
-                r = requests.post('%s/clusters/' % (MISTER_CLUSTER_URL), data=json.dumps(cluster_creation_data), headers=headers)
+                cluster_creation_data = {"user_id": "1",
+                                         "site_id": "1",
+                                         "appliance": appliance,
+                                         "name": "MyHadoopCluster"}
+                r = requests.post('%s/clusters/' % (MISTER_CLUSTER_URL),
+                                  data=json.dumps(cluster_creation_data), headers=headers)
 
                 response = json.loads(r.content)
                 cluster_id = response["cluster_id"]
@@ -117,14 +121,16 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 
                 logging.info("adding a new node (master) to the cluster %s" % (cluster_id))
                 node_addition_data = {"cluster_id": cluster_id}
-                r = requests.post('%s/hosts/' % (MISTER_CLUSTER_URL), data=json.dumps(node_addition_data), headers=headers)
+                r = requests.post('%s/hosts/' % (MISTER_CLUSTER_URL),
+                                  data=json.dumps(node_addition_data), headers=headers)
 
                 # Add a slave node to the cluster
                 execution.status_info = "Adding slave node"
                 execution.save()
 
                 logging.info("adding a new node (slave) to the cluster %s" % (cluster_id))
-                r = requests.post('%s/hosts/' % (MISTER_CLUSTER_URL), data=json.dumps(node_addition_data), headers=headers)
+                r = requests.post('%s/hosts/' % (MISTER_CLUSTER_URL),
+                                  data=json.dumps(node_addition_data), headers=headers)
 
             execution.status = "DEPLOYED"
             execution.status_info = ""
