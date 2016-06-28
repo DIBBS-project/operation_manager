@@ -2,44 +2,12 @@
 
 # set -x
 
-PROCESS_REGISTRY_URL="http://127.0.0.1:8000"
-PROCESS_DISPATCHER_URL="http://127.0.0.1:8001"
 RESOURCE_MANAGER_URL="http://127.0.0.1:8002"
-APPLIANCE_REGISTRY_URL="http://127.0.0.1:8003"
-
-CALLBACK_URL="http://requestb.in/1ajj2571"
-
-echo "Testing the streaming architecture"
-
-function extract_token {
-
-    RESULT=$(echo $1 | sed 's/.*"token"://g' | sed 's/,.*//g' | sed 's/"//g' | sed 's/}//g')
-
-    echo "$RESULT"
-}
-
-function extract_id {
-
-    RESULT=$(echo $1 | sed 's/.*"id"://g' | sed 's/,.*//g')
-
-    echo "$RESULT"
-}
-
+PASSWORD="bar"
 
 ########################################################
 # CREATION OF A USER FOR OPENSTACK
 ########################################################
-
-USER="jpastor"
-PASSWORD="bar"
-PROJECT="FG-392"
-
-function extract_cluster_id {
-
-    RESULT=$(echo $1 | sed 's/.*"cluster_id"://g' | sed 's/,.*//g' | sed 's/}//g')
-
-    echo "$RESULT"
-}
 
 function extract_user_id {
 
@@ -55,7 +23,24 @@ function extract_api_token {
     echo "$RESULT"
 }
 
+
+if [ "$#" -ne 2 ]; then
+    if [ "$#" -ne 3 ]; then
+        echo "Usage: $0 <username> <project> [<resource manager URL>]"
+        exit 1
+    fi
+fi
+
+USER=$1
+PROJECT=$2
+if [ "$#" -ne 2 ]; then
+    RESOURCE_MANAGER_URL=$3
+fi
+
+
 # Create a new user
+echo "Creating user \"$USER\" with project \"$PROJECT\"..."
+
 USER_CREATION_OUTPUT=$(curl -H "Content-Type: application/json" -X POST -d "{\"username\": \"$USER\", \"project\": \"$PROJECT\", \"password\": \"$PASSWORD\"}" $RESOURCE_MANAGER_URL/users/)
 USER_ID=$(extract_user_id $USER_CREATION_OUTPUT)
 TOKEN=$(extract_api_token $USER_CREATION_OUTPUT)
@@ -77,11 +62,12 @@ echo "=========== encrypted(password) ==========="
 cat cipher.txt
 echo "==========================================="
 
-set -x
+# set -x
 
 # Send the encrypted password to the webservice
 curl -i -H "TOKEN: $TOKEN" -X PATCH -F 'data=@cipher.txt' $RESOURCE_MANAGER_URL/users/$USER_ID/
 
-echo "MRCLUSTER_TOKEN: $TOKEN"
+# echo "MRCLUSTER_TOKEN: $TOKEN"
+echo ""
 
 exit 0
