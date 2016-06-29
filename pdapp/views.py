@@ -106,7 +106,6 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 
                 logging.info("creating the logical cluster")
                 cluster_creation_data = {"user_id": "1",
-                                         "site_id": "1",
                                          "appliance": appliance,
                                          "name": "MyHadoopCluster"}
                 r = requests.post('%s/clusters/' % (MISTER_CLUSTER_URL),
@@ -230,7 +229,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
             }
             r = requests.post('%s/fs/upload/script.sh/' % (REMOTE_HADOOP_WEBSERVICE_HOST), headers=headers, files=files)
             # curl --header "token: $TOKEN" -i -X POST -F 'data=@test.sh' $REMOTE_HADOOP_WEBSERVICE_HOST/fs/upload/test.sh/
-            print r
+            print (r)
 
             execution.status = "RUNNING"
             execution.status_info = "Executing the job"
@@ -240,7 +239,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
             logging.info("running script.sh")
             r = requests.get('%s/fs/run/script.sh/' % (REMOTE_HADOOP_WEBSERVICE_HOST), headers=headers)
             # curl --header "token: $TOKEN" -i -X GET  $REMOTE_HADOOP_WEBSERVICE_HOST/fs/run/test.sh/
-            print r
+            print (r)
 
             execution.status = "COLLECTING"
             execution.save()
@@ -252,7 +251,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
             logging.info("downloading the output")
             r = requests.get('%s/fs/download/output.txt/' % (REMOTE_HADOOP_WEBSERVICE_HOST), headers=headers)
             # curl --header "token: $TOKEN" -X GET $REMOTE_HADOOP_WEBSERVICE_HOST/fs/download/out.txt/
-            print r
+            print (r)
 
             # Sending the result to the callback url
             logging.info("calling the callback (%s)" % (callback_url))
@@ -260,7 +259,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
             execution.save()
 
             r = requests.post(callback_url, data=r.content)
-            print r
+            print (r)
 
             execution.output_location = '%s/fs/download/output.txt/?token=%s' % (REMOTE_HADOOP_WEBSERVICE_HOST, token)
             execution.status = "FINISHED"

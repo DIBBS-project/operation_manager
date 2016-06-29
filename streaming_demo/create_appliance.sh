@@ -26,6 +26,30 @@ function extract_id {
 
 
 ########################################################
+# CREATION OF SITES
+########################################################
+
+SITE_NAME=KVM@TACC
+SITE_URL=https://openstack.tacc.chameleoncloud.org:5000/v2.0
+
+if [ "$1" != "skip" ]; then
+  read -r -d '' ACTION_JSON_VALUE <<- EOM
+{
+  "name": "$SITE_NAME",
+  "contact_url": "$SITE_URL"
+}
+EOM
+  ACTION_REGISTRATION_OUTPUT=$(curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$ACTION_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/sites/")
+
+
+
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
+  "name": "KVM@TACC",
+  "contact_url": "https://openstack.tacc.chameleoncloud.org:5000/v2.0"
+}' 'http://127.0.0.1:8003/sites/'
+fi
+
+########################################################
 # CREATION OF ACTIONS
 ########################################################
 
@@ -76,7 +100,8 @@ for FOLDER in appliances/*; do
     APPLIANCE_NAME=$(echo $FOLDER | sed 's/.*\///g' | sed 's/\..*//g')
     read -r -d '' APPLIANCE_JSON_VALUE <<- EOM
 {
-  "name": "${APPLIANCE_NAME}"
+  "name": "${APPLIANCE_NAME}",
+  "site": "$SITE_NAME"
 }
 EOM
     curl -u admin:pass -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "$APPLIANCE_JSON_VALUE" "$APPLIANCE_REGISTRY_URL/appliances/"
