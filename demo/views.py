@@ -48,4 +48,6 @@ def show_details(request, pk):
 
 
 def create_execution(request):
-    return render(request, "exec_form.html")
+    from pdapp.pr_client.apis.process_definitions_api import ProcessDefinitionsApi
+    processdefs = ProcessDefinitionsApi().processdef_get()
+    return render(request, "exec_form.html", {"processdefs": processdefs})
