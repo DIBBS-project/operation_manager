@@ -23,7 +23,7 @@ def executions(request):
 
     executions = models.Execution.objects.all()
     for execution in executions:
-        ret = ProcessDefinitionsApi().processdef_id_get(id=execution.process_id)
+        ret = ProcessDefinitionsApi().processdefs_id_get(id=execution.process_id)
         tuple = {
             "execution": execution,
             "process": ret,
@@ -37,7 +37,7 @@ def executions(request):
 def show_details(request, pk):
 
     execution = models.Execution.objects.filter(id=pk)[0]
-    ret = ProcessDefinitionsApi().processdef_id_get(id=execution.process_id)
+    ret = ProcessDefinitionsApi().processdefs_id_get(id=execution.process_id)
     tuple = {
         "execution": execution,
         "process": ret,
@@ -49,5 +49,5 @@ def show_details(request, pk):
 
 def create_execution(request):
     from pdapp.pr_client.apis.process_definitions_api import ProcessDefinitionsApi
-    processdefs = ProcessDefinitionsApi().processdef_get()
+    processdefs = ProcessDefinitionsApi().processdefs_get()
     return render(request, "exec_form.html", {"processdefs": processdefs})

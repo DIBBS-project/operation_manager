@@ -69,18 +69,30 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 
         # Check that the process definition exists
         process_id = data2[u'process_id']
-        ret = ProcessDefinitionsApi().processdef_id_get(id=process_id)
+        ret = ProcessDefinitionsApi().processdefs_id_get(id=process_id)
+
+        if ret.argv == "":
+            ret.argv = []
+        else:
+            ret.argv = json.loads(ret.argv)
+        if ret.environment == "":
+            ret.environment = {}
+        else:
+            ret.environment = json.loads(ret.environment)
+        if ret.output_parameters == "":
+            ret.output_parameters = {}
+        else:
+            ret.output_parameters = json.loads(ret.output_parameters)
 
         # Get all the required information
         appliance = ret.appliance
-        record = json.loads(ret.adapters)
         parameters = json.loads(data2[u'parameters'])
         files = json.loads(data2[u'files'])
         filenames = fileneames_dictionary(files)
-        record = set_variables(record, parameters)
-        record = set_files(record, filenames)
+        ret = set_variables(ret, parameters)
+        ret = set_files(ret, filenames)
 
-        script = get_bash_script(record, ret.archive_url, files, filenames)
+        script = get_bash_script(ret, files, filenames)
         print (script)
 
         # Save in the database
