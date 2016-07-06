@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Process Dispatcher API
   description: Execute processes with the Process Dispatcher API.
-  version: "0.1"
+  version: "0.1.1"
 # the domain of the service
 host: 127.0.0.1:8001
 # array of all schemes that your API supports
@@ -42,13 +42,13 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     post:
-      summary: Add a new execution.
+      summary: Register a new execution.
       description: |
-        Add a new execution. Authentification is required.
+        Register a new execution. Authentification is required.
       security:
         - basic: []
         - api_key: []
-      
+
       parameters:
         - name: data
           in: body
@@ -75,7 +75,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: Id of the execution
+          description: ID of the execution
           required: true
           type: integer
           minimum: 0
@@ -83,11 +83,11 @@ paths:
         - Executions
       responses:
         200:
-          description: The execution matching the given Id
+          description: The execution matching the given ID
           schema:
             $ref: '#/definitions/Exec'
         404:
-          description: No execution with the given Id
+          description: No execution with the given ID
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -101,11 +101,11 @@ paths:
       security:
         - basic: []
         - api_key: []
-      
+
       parameters:
         - name: id
           in: path
-          description: Id of the execution
+          description: ID of the execution
           required: true
           type: integer
           minimum: 0
@@ -123,7 +123,7 @@ paths:
           schema:
             $ref: '#/definitions/Exec'
         404:
-          description: No execution with the given Id
+          description: No execution with the given ID
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -137,11 +137,11 @@ paths:
       security:
         - basic: []
         - api_key: []
-      
+
       parameters:
         - name: id
           in: path
-          description: Id of the execution
+          description: ID of the execution
           required: true
           type: integer
           minimum: 0
@@ -159,7 +159,7 @@ paths:
           schema:
             $ref: '#/definitions/Exec'
         404:
-          description: No execution with the given Id
+          description: No execution with the given ID
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -173,7 +173,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: Id of the execution
+          description: ID of the execution
           required: true
           type: integer
           minimum: 0
@@ -186,9 +186,40 @@ paths:
         204:
           description: Execution correctly deleted
         404:
-          description: No execution with the given Id
+          description: No execution with the given ID
           schema:
             $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /exec/{id}/run/:
+    get:
+      summary: Run an already registered execution.
+      description: |
+        Run an already registered execution.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the execution
+          required: true
+          type: integer
+          minimum: 0
+      tags:
+        - Executions
+      responses:
+        202:
+          description: Execution successfully run
+          schema:
+            $ref: '#/definitions/Status'
+        404:
+          description: No execution with the given ID
+          schema:
+            $ref: '#/definitions/Status'
+        412:
+          description: Error while processing the process definition
+          schema:
+            $ref: '#/definitions/Status'
         default:
           description: Unexpected error
           schema:
@@ -219,7 +250,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: Id of the user
+          description: ID of the user
           required: true
           type: integer
           minimum: 0
@@ -227,11 +258,11 @@ paths:
         - Users
       responses:
         200:
-          description: The user matching the given Id
+          description: The user matching the given ID
           schema:
             $ref: '#/definitions/User'
         404:
-          description: No user with the given Id
+          description: No user with the given ID
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -362,6 +393,11 @@ definitions:
     type: object
     properties:
       detail:
+        type: string
+  Status:
+    type: object
+    properties:
+      status:
         type: string
   TokenResp:
     type: object
