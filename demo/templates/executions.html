@@ -25,6 +25,7 @@
     <meta name="generator" content="Org-mode"/>
     <meta name="author" content="Jonathan"/>
     <style type="text/css">
+        div#preload { display: none; }
     </style>
     <script type="text/javascript">
         window.setInterval(function() {
@@ -34,9 +35,19 @@
                 }
             });
         }, 5000)
+
+        function runExecution(id, button) {
+            $(button).replaceWith('<img src="/static/loading.gif" alt="loading">');
+            $.ajax({
+                url: "/exec/" + id + "/run/"
+            });
+        }
     </script>
 </head>
 <body>
+<div id="preload">
+    <img src="/static/loading.gif" alt="loading">
+</div>
 <div id="content_hidden" style="display: none;">Hidden</div>
 <div id="content">
     <h3>Executions</h3>
@@ -46,9 +57,9 @@
             <th>ID</th>
             <th>Process</th>
             <th>Appliance</th>
-            <th>Info</th>
             <th>Status</th>
-            <th>Result</th>
+            <th>Info</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -57,16 +68,21 @@
                 <td><a target="_blank" href="{% url 'execution_details' tuple.execution.id %}">Execution {{ tuple.execution.id }}</a></td>
                 <td>{{ tuple.process.name }} ({{ tuple.process.id }})</td>
                 <td>{{ tuple.appliance.name }} ({{ tuple.appliance.infrastructure }})</td>
-                <td>
-                    {% if tuple.execution.status_info != "" %}
-                    {{ tuple.execution.status_info }}
-                    {% else %}
-                        -
-                    {% endif %}</td>
                 <td>{{ tuple.execution.status }}</td>
                 <td>
-                    {% if tuple.execution.output_location != "" %}
-                    <a target="_blank" href="{{ tuple.execution.output_location }}" class="btn btn-default">View result</a>
+                    {% if tuple.execution.status_info != "" %}
+                        {{ tuple.execution.status_info }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    {% if tuple.execution.status == "PENDING" %}
+                        <a onclick="runExecution({{ tuple.execution.id }}, this);" class="btn btn-default">Run</a>
+                    {% elif tuple.execution.output_location != "" %}
+                        <a target="_blank" href="{{ tuple.execution.output_location }}" class="btn btn-default">View result</a>
+                    {% else %}
+                        <img src="/static/loading.gif" alt="loading">
                     {% endif %}
                 </td>
             </tr>
