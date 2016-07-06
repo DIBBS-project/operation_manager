@@ -52,6 +52,7 @@ def deploy_cluster(execution, appliance, MISTER_CLUSTER_URL):
     logging.info("description will be returned %s" % (description))
     return description
 
+
 def run_process(cluster, script, callback_url, execution):
 
     execution.status = "PREPARING"

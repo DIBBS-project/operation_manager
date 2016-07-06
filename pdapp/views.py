@@ -12,10 +12,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-import logging
+from settings import Settings
 
-MISTER_CLUSTER_URL = "http://127.0.0.1:8002"
-MISTER_CLUSTER_TOKEN = "849fcb45-f666-4642-8c8b-f16973fb29fa"
+import logging
 
 logging.basicConfig(level=logging.INFO)
 
@@ -126,7 +125,7 @@ def run_execution(request, pk):
         # Call Mr Cluster
 
         logging.info("Creating a virtual cluster")
-        cluster = deploy_cluster(execution, appliance, MISTER_CLUSTER_URL)
+        cluster = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
 
         logging.info("Running a process on the cluster %s" % (cluster))
         run_process(cluster, script, callback_url, execution)
@@ -134,4 +133,7 @@ def run_execution(request, pk):
         return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
 
     except:
+        execution.status = "FAILED"
+        execution.status_info = "Incorrect process definition or parameters"
+        execution.save()
         return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)

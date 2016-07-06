@@ -66,12 +66,12 @@
               <li class="active"><a href="#">Home</a></li>
               <li>
                   <p class="navbar-btn" style="margin-left: 10px">
-                      <a href="//127.0.0.1:8000/demo/processdef_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default">New process definition</a>
+                      <a href="{{ urls.process_registry }}/demo/processdef_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default">New process definition</a>
                 </p>
               </li>
               <li>
                   <p class="navbar-btn" style="margin-left: 10px">
-                      <a href="//127.0.0.1:8001/demo/exec_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default">New execution</a>
+                      <a href="{{ urls.process_dispatcher }}/demo/exec_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default">New execution</a>
                 </p>
               </li>
           </ul>
@@ -91,7 +91,7 @@
                 <h3 class="panel-title">Process Registry</h3>
               </div>
               <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="//127.0.0.1:8000/demo/processdefs/"></iframe>
+                  <iframe class="iframe_mister_cluster" src="{{ urls.process_registry }}/demo/processdefs/"></iframe>
               </div>
             </div>
         </div>
@@ -102,7 +102,7 @@
                 <h3 class="panel-title">Process Dispatcher</h3>
               </div>
               <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="//127.0.0.1:8001/demo/executions/"></iframe>
+                  <iframe class="iframe_mister_cluster" src="{{ urls.process_dispatcher }}/demo/executions/"></iframe>
               </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
                 <h3 class="panel-title">Appliance Registry</h3>
               </div>
               <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="//127.0.0.1:8003/demo/appliances/"></iframe>
+                  <iframe class="iframe_mister_cluster" src="{{ urls.appliance_registry }}/demo/appliances/"></iframe>
               </div>
             </div>
         </div>
@@ -126,7 +126,7 @@
                 <h3 class="panel-title">Resource Provisioner</h3>
               </div>
               <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="//127.0.0.1:8002/demo/users/"></iframe>
+                  <iframe class="iframe_mister_cluster" src="{{ urls.resource_provisioner }}/demo/users/"></iframe>
               </div>
             </div>
         </div>
