@@ -3,8 +3,8 @@ from pdapp.permissions import IsOwnerOrReadOnly
 # Create your views here.
 
 from django.contrib.auth.models import User
-from pdapp.models import Execution
-from pdapp.serializers import ExecutionSerializer, UserSerializer
+from pdapp.models import Execution, ProcessInstance
+from pdapp.serializers import ExecutionSerializer, ProcessInstanceSerializer, UserSerializer
 from rest_framework import viewsets, permissions, status
 from django.views.decorators.csrf import csrf_exempt
 
@@ -35,6 +35,41 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
 
+class ProcessInstanceViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list`, `create`, `retrieve`,
+    `update` and `destroy` actions.
+    """
+    queryset = ProcessInstance.objects.all()
+    serializer_class = ProcessInstanceSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        return serializer.save(author=self.request.user)
+
+    # Override to set the user of the request using the credentials provided to perform the request.
+    def create(self, request, *args, **kwargs):
+        from pr_client.apis import ProcessDefinitionsApi
+
+        data2 = {}
+        for key in request.data:
+            data2[key] = request.data[key]
+        data2[u'author'] = request.user.id
+        data2[u'executions'] = {}
+        serializer = self.get_serializer(data=data2)
+        serializer.is_valid(raise_exception=True)
+
+        # Check that the process definition exists
+        process_definition_id = data2[u'process_definition_id']
+        ProcessDefinitionsApi().processdefs_id_get(id=process_definition_id)
+
+        # Save in the database
+        self.perform_create(serializer)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
 class ExecutionViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list`, `create`, `retrieve`,
@@ -42,30 +77,22 @@ class ExecutionViewSet(viewsets.ModelViewSet):
     """
     queryset = Execution.objects.all()
     serializer_class = ExecutionSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
 
     # Override to set the user of the request using the credentials provided to perform the request.
     def create(self, request, *args, **kwargs):
-
-        from pr_client.apis import ProcessDefinitionsApi
-
-        # data2 = request.data
         data2 = {}
         for key in request.data:
             data2[key] = request.data[key]
         data2[u'status'] = "PENDING"
         data2[u'status_info'] = ""
         data2[u'author'] = request.user.id
+        data2[u'output_location'] = ""
         serializer = self.get_serializer(data=data2)
         serializer.is_valid(raise_exception=True)
-
-        # Check that the process definition exists
-        process_id = data2[u'process_id']
-        ProcessDefinitionsApi().processdefs_id_get(id=process_id)
 
         # Save in the database
         self.perform_create(serializer)
@@ -93,8 +120,8 @@ def run_execution(request, pk):
         execution.save()
 
         # Check that the process definition exists
-        process_id = execution.process_id
-        ret = ProcessDefinitionsApi().processdefs_id_get(id=process_id)
+        process_definition_id = execution.process_instance.process_definition_id
+        ret = ProcessDefinitionsApi().processdefs_id_get(id=process_definition_id)
 
         if ret.argv == "":
             ret.argv = []
@@ -111,8 +138,8 @@ def run_execution(request, pk):
 
         # Get all the required information
         appliance = ret.appliance
-        parameters = json.loads(execution.parameters)
-        files = json.loads(execution.files)
+        parameters = json.loads(execution.process_instance.parameters)
+        files = json.loads(execution.process_instance.files)
         filenames = fileneames_dictionary(files)
         ret = set_variables(ret, parameters)
         ret = set_files(ret, filenames)
@@ -127,7 +154,7 @@ def run_execution(request, pk):
         logging.info("Creating a virtual cluster")
         cluster = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
 
-        logging.info("Running a process on the cluster %s" % (cluster))
+        logging.info("Running a process on the cluster %s" % cluster)
         run_process(cluster, script, callback_url, execution)
 
         return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)

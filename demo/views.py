@@ -4,14 +4,7 @@ from pdapp.pr_client.apis import ProcessDefinitionsApi
 
 from settings import Settings
 
-import re
-
-
-def get_appliance(appliance_id):
-    return {
-        "name": "Hadoop",
-        "infrastructure": "Chameleon (OpenStack)"
-    }
+import re, json
 
 
 # Index that provides a description of the API
@@ -26,22 +19,34 @@ def index(request):
     return render(request, "index.html", {'urls': urls})
 
 
-# Index that provides a description of the API
-def executions(request):
+def process_instances(request):
 
     tuples = []
 
-    executions = models.Execution.objects.all()
-    for execution in executions:
-        ret = ProcessDefinitionsApi().processdefs_id_get(id=execution.process_id)
-        tuple = {
-            "execution": execution,
-            "process": ret,
-            "appliance": get_appliance(ret.appliance)
+    process_instances_list = models.ProcessInstance.objects.all()
+    for process_instance in process_instances_list:
+        ret = ProcessDefinitionsApi().processdefs_id_get(id=process_instance.process_definition_id)
+        process_instance.expanded_parameters = []
+        for key, val in json.loads(process_instance.parameters).items():
+            process_instance.expanded_parameters = process_instance.expanded_parameters + [{"key": key,
+                                                                                            "val": val}]
+        process_instance.expanded_files = []
+        for key, val in json.loads(process_instance.files).items():
+            process_instance.expanded_files = process_instance.expanded_files + [{"key": key,
+                                                                                  "val": val}]
+        exec_tuple = {
+            "process_instance": process_instance,
+            "process_definition": ret,
         }
-        tuples += [tuple]
+        tuples += [exec_tuple]
 
-    return render(request, "executions.html", {"tuples": tuples})
+    return render(request, "process_instances.html", {"tuples": tuples})
+
+
+def executions(request):
+    executions_list = models.Execution.objects.all()
+
+    return render(request, "executions.html", {"executions": executions_list})
 
 
 def show_details(request, pk):
@@ -51,13 +56,16 @@ def show_details(request, pk):
     tuple = {
         "execution": execution,
         "process": ret,
-        "appliance": get_appliance(ret.appliance_id)
     }
 
     return render(request, "tuple.html", {"tuple": tuple})
 
 
-def create_execution(request):
+def create_process_instance(request):
     from pdapp.pr_client.apis.process_definitions_api import ProcessDefinitionsApi
     processdefs = ProcessDefinitionsApi().processdefs_get()
-    return render(request, "exec_form.html", {"processdefs": processdefs})
+    return render(request, "process_instance_form.html", {"processdefs": processdefs})
+
+
+def create_execution(request):
+    return render(request, "execution_form.html", {"instances": models.ProcessInstance.objects.all()})

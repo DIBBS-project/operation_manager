@@ -24,9 +24,6 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <meta name="generator" content="Org-mode"/>
     <meta name="author" content="Jonathan"/>
-    <style type="text/css">
-        div#preload { display: none; }
-    </style>
     <script type="text/javascript">
         window.setInterval(function() {
             $("#content_hidden").load(location.href+" #content>*", function() {
@@ -35,54 +32,42 @@
                 }
             });
         }, 5000)
-
-        function runExecution(id, button) {
-            $(button).replaceWith('<img src="/static/loading.gif" alt="loading">');
-            $.ajax({
-                url: "/exec/" + id + "/run/"
-            });
-        }
     </script>
 </head>
 <body>
-<div id="preload">
-    <img src="/static/loading.gif" alt="loading">
-</div>
 <div id="content_hidden" style="display: none;">Hidden</div>
 <div id="content">
     <table class="table">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Instance</th>
-                <th>Callback</th>
-                <th>Status</th>
-                <th>Info</th>
-                <th>Actions</th>
+                <th>Name</th>
+                <th>Process Definition</th>
+                <th>Appliance</th>
+                <th>Parameters</th>
+                <th>Files</th>
             </tr>
         </thead>
         <tbody>
-        {% for execution in executions %}
+        {% for tuple in tuples %}
             <tr>
-                <td>{{ execution.id }}</td>
-                <td>#{{ execution.process_instance.id }} - {{ execution.process_instance.name }}</td>
-                <td>{{ execution.callback_url }}</td>
-                <td>{{ execution.status }}</td>
+                <td>{{ tuple.process_instance.id }}</td>
+                <td>{{ tuple.process_instance.name }}</td>
+                <td>#{{ tuple.process_definition.id }} - {{ tuple.process_definition.name }}</td>
+                <td>{{ tuple.process_definition.appliance }}</td>
                 <td>
-                    {% if execution.status_info != "" %}
-                        {{ execution.status_info }}
-                    {% else %}
-                        -
-                    {% endif %}
+                    <ul>
+                        {% for pair in tuple.process_instance.expanded_parameters %}
+                            <li>{{ pair.key }}: {{ pair.val }}</li>
+                        {% endfor %}
+                    </ul>
                 </td>
-                <td style="text-align: center;">
-                    {% if execution.status == "PENDING" %}
-                        <a onclick="runExecution({{ execution.id }}, this);" class="btn btn-default">Run</a>
-                    {% elif execution.output_location != "" %}
-                        <a target="_blank" href="{{ execution.output_location }}" class="btn btn-default">View result</a>
-                    {% else %}
-                        <img src="/static/loading.gif" alt="loading">
-                    {% endif %}
+                <td>
+                    <ul>
+                        {% for pair in tuple.process_instance.expanded_files %}
+                            <li>{{ pair.key }}: {{ pair.val }}</li>
+                        {% endfor %}
+                    </ul>
                 </td>
             </tr>
         {% endfor %}
