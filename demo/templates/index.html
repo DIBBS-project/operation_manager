@@ -47,6 +47,12 @@
             padding: 0;
         }
 
+        .panel-buttons {
+            position: absolute;
+            right: 30px;
+            top: 8px;
+        }
+
     </style>
     <script type="text/javascript">
 {#        window.setTimeout(function() {#}
@@ -85,7 +91,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Process Registry</h3>
-                    <div style="position: absolute; right: 30px; top: 8px">
+                    <div class="panel-buttons">
                         <a href="{{ urls.process_registry }}/demo/processdef_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default btn-xs">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                             Process definition
@@ -102,7 +108,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Process Dispatcher</h3>
-                    <div style="position: absolute; right: 30px; top: 8px">
+                    <div class="panel-buttons">
                         <a href="{{ urls.process_dispatcher }}/demo/process_instance_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default btn-xs">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                             Process instance
@@ -139,7 +145,26 @@
                     <h3 class="panel-title">Appliance Registry</h3>
                 </div>
                 <div class="panel-body">
-                    <iframe class="iframe_mister_cluster" src="{{ urls.appliance_registry }}/demo/appliances/"></iframe>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#appliances">Appliances</a></li>
+                        <li><a data-toggle="tab" href="#appliance_implementations">Appliance Implementations</a></li>
+                        <li><a data-toggle="tab" href="#sites">Sites</a></li>
+                        <li><a data-toggle="tab" href="#actions">Actions</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="appliances" class="tab-pane fade in active">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.appliance_registry }}/demo/appliances/"></iframe>
+                        </div>
+                        <div id="sites" class="tab-pane fade">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.appliance_registry }}/demo/sites/"></iframe>
+                        </div>
+                        <div id="appliance_implementations" class="tab-pane fade">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.appliance_registry }}/demo/appliance_implementations/"></iframe>
+                        </div>
+                        <div id="actions" class="tab-pane fade">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.appliance_registry }}/demo/actions/"></iframe>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
