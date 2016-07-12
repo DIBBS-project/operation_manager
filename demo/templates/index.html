@@ -99,7 +99,14 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <iframe class="iframe_mister_cluster" src="{{ urls.process_registry }}/demo/processdefs/"></iframe>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#process_definitions">Process definitions</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="process_definitions" class="tab-pane fade in active">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.process_registry }}/demo/processdefs/"></iframe>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -117,7 +124,7 @@
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                             Execution
                         </a>
-                        </div>
+                    </div>
                 </div>
                 <div class="panel-body">
                     <ul class="nav nav-tabs">
@@ -174,7 +181,14 @@
                     <h3 class="panel-title">Resource Provisioner</h3>
                 </div>
                 <div class="panel-body">
-                    <iframe class="iframe_mister_cluster" src="{{ urls.resource_provisioner }}/demo/users/"></iframe>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#users">Users</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="users" class="tab-pane fade in active">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.resource_provisioner }}/demo/users/"></iframe>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
