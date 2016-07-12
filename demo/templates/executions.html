@@ -56,6 +56,7 @@
         <tr>
             <th>ID</th>
             <th>Process</th>
+            <th>Process Impl</th>
             <th>Appliance</th>
             <th>Status</th>
             <th>Info</th>
@@ -66,7 +67,8 @@
         {% for tuple in tuples %}
             <tr>
                 <td><a target="_blank" href="{% url 'execution_details' tuple.execution.id %}">Execution {{ tuple.execution.id }}</a></td>
-                <td>{{ tuple.process.name }} ({{ tuple.process.id }})</td>
+                <td>{{ tuple.process_def.name }} ({{ tuple.process_def.id }})</td>
+                <td>{{ tuple.process_impl.name }} ({{ tuple.process_impl.id }})</td>
                 <td>{{ tuple.appliance.name }} ({{ tuple.appliance.infrastructure }})</td>
                 <td>{{ tuple.execution.status }}</td>
                 <td>

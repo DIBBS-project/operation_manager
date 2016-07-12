@@ -8,6 +8,7 @@ from pdapp.serializers import ExecutionSerializer, UserSerializer
 from rest_framework import viewsets, permissions, status
 from django.views.decorators.csrf import csrf_exempt
 
+from pdapp.pr_client.apis import ProcessDefinitionsApi, ProcessImplementationApi
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -94,30 +95,32 @@ def run_execution(request, pk):
 
         # Check that the process definition exists
         process_id = execution.process_id
-        ret = ProcessDefinitionsApi().processdefs_id_get(id=process_id)
+        process_impl = ProcessImplementationApi().processimpls_id_get(id=execution.process_id)
+        process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
+        # ret = ProcessDefinitionsApi().processdefs_id_get(id=process_id)
 
-        if ret.argv == "":
-            ret.argv = []
+        if process_def.argv == "":
+            process_def.argv = []
         else:
-            ret.argv = json.loads(ret.argv)
-        if ret.environment == "":
-            ret.environment = {}
+            process_def.argv = json.loads(process_def.argv)
+        if process_impl.environment == "":
+            process_impl.environment = {}
         else:
-            ret.environment = json.loads(ret.environment)
-        if ret.output_parameters == "":
-            ret.output_parameters = {}
+            process_impl.environment = json.loads(process_impl.environment)
+        if process_def.output_parameters == "":
+            process_def.output_parameters = {}
         else:
-            ret.output_parameters = json.loads(ret.output_parameters)
+            process_def.output_parameters = json.loads(process_def.output_parameters)
 
         # Get all the required information
-        appliance = ret.appliance
+        appliance = process_impl.appliance
         parameters = json.loads(execution.parameters)
         files = json.loads(execution.files)
         filenames = fileneames_dictionary(files)
-        ret = set_variables(ret, parameters)
-        ret = set_files(ret, filenames)
+        (process_def, process_impl) = set_variables(process_def, process_impl, parameters)
+        (process_def, process_impl) = set_files(process_def, process_impl, filenames)
 
-        script = get_bash_script(ret, files, filenames)
+        script = get_bash_script(process_def, process_impl, files, filenames)
         print (script)
 
         callback_url = execution.callback_url

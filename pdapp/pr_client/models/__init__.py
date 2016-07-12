@@ -30,5 +30,8 @@ from .error import Error
 from .process_def import ProcessDef
 from .process_def_patch import ProcessDefPatch
 from .process_def_post import ProcessDefPost
+from .process_impl import ProcessImpl
+from .process_impl_patch import ProcessImplPatch
+from .process_impl_post import ProcessImplPost
 from .token_resp import TokenResp
 from .user import User

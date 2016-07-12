@@ -48,7 +48,7 @@ paths:
       security:
         - basic: []
         - api_key: []
-      
+
       parameters:
         - name: data
           in: body
@@ -101,7 +101,7 @@ paths:
       security:
         - basic: []
         - api_key: []
-      
+
       parameters:
         - name: id
           in: path
@@ -137,7 +137,7 @@ paths:
       security:
         - basic: []
         - api_key: []
-      
+
       parameters:
         - name: id
           in: path
