@@ -45,44 +45,29 @@ class ProcessDef(object):
             'id': 'int',
             'name': 'str',
             'author': 'int',
-            'appliance': 'str',
-            'archive_url': 'str',
-            'creation_date': 'datetime',
-            'executable': 'str',
-            'cwd': 'str',
-            'environment': 'str',
             'argv': 'str',
             'output_type': 'str',
-            'output_parameters': 'str'
+            'output_parameters': 'str',
+            'implementations': 'list[int]'
         }
 
         self.attribute_map = {
             'id': 'id',
             'name': 'name',
             'author': 'author',
-            'appliance': 'appliance',
-            'archive_url': 'archive_url',
-            'creation_date': 'creation_date',
-            'executable': 'executable',
-            'cwd': 'cwd',
-            'environment': 'environment',
             'argv': 'argv',
             'output_type': 'output_type',
-            'output_parameters': 'output_parameters'
+            'output_parameters': 'output_parameters',
+            'implementations': 'implementations'
         }
 
         self._id = None
         self._name = None
         self._author = None
-        self._appliance = None
-        self._archive_url = None
-        self._creation_date = None
-        self._executable = None
-        self._cwd = None
-        self._environment = None
         self._argv = None
         self._output_type = None
         self._output_parameters = None
+        self._implementations = None
 
     @property
     def id(self):
@@ -154,144 +139,6 @@ class ProcessDef(object):
         self._author = author
 
     @property
-    def appliance(self):
-        """
-        Gets the appliance of this ProcessDef.
-        Name of the appliance on which the process must be run
-
-        :return: The appliance of this ProcessDef.
-        :rtype: str
-        """
-        return self._appliance
-
-    @appliance.setter
-    def appliance(self, appliance):
-        """
-        Sets the appliance of this ProcessDef.
-        Name of the appliance on which the process must be run
-
-        :param appliance: The appliance of this ProcessDef.
-        :type: str
-        """
-        
-        self._appliance = appliance
-
-    @property
-    def archive_url(self):
-        """
-        Gets the archive_url of this ProcessDef.
-        URL of the archive to be downloaded and extracted on the worker of the cluster before starting the job
-
-        :return: The archive_url of this ProcessDef.
-        :rtype: str
-        """
-        return self._archive_url
-
-    @archive_url.setter
-    def archive_url(self, archive_url):
-        """
-        Sets the archive_url of this ProcessDef.
-        URL of the archive to be downloaded and extracted on the worker of the cluster before starting the job
-
-        :param archive_url: The archive_url of this ProcessDef.
-        :type: str
-        """
-        
-        self._archive_url = archive_url
-
-    @property
-    def creation_date(self):
-        """
-        Gets the creation_date of this ProcessDef.
-        Date and time of creation of the process
-
-        :return: The creation_date of this ProcessDef.
-        :rtype: datetime
-        """
-        return self._creation_date
-
-    @creation_date.setter
-    def creation_date(self, creation_date):
-        """
-        Sets the creation_date of this ProcessDef.
-        Date and time of creation of the process
-
-        :param creation_date: The creation_date of this ProcessDef.
-        :type: datetime
-        """
-        
-        self._creation_date = creation_date
-
-    @property
-    def executable(self):
-        """
-        Gets the executable of this ProcessDef.
-        Path to the executable
-
-        :return: The executable of this ProcessDef.
-        :rtype: str
-        """
-        return self._executable
-
-    @executable.setter
-    def executable(self, executable):
-        """
-        Sets the executable of this ProcessDef.
-        Path to the executable
-
-        :param executable: The executable of this ProcessDef.
-        :type: str
-        """
-        
-        self._executable = executable
-
-    @property
-    def cwd(self):
-        """
-        Gets the cwd of this ProcessDef.
-        Working directory to be in when ruing the process
-
-        :return: The cwd of this ProcessDef.
-        :rtype: str
-        """
-        return self._cwd
-
-    @cwd.setter
-    def cwd(self, cwd):
-        """
-        Sets the cwd of this ProcessDef.
-        Working directory to be in when ruing the process
-
-        :param cwd: The cwd of this ProcessDef.
-        :type: str
-        """
-        
-        self._cwd = cwd
-
-    @property
-    def environment(self):
-        """
-        Gets the environment of this ProcessDef.
-        JSON-formatted dictonary to give values to environment variables (can contain parameters)
-
-        :return: The environment of this ProcessDef.
-        :rtype: str
-        """
-        return self._environment
-
-    @environment.setter
-    def environment(self, environment):
-        """
-        Sets the environment of this ProcessDef.
-        JSON-formatted dictonary to give values to environment variables (can contain parameters)
-
-        :param environment: The environment of this ProcessDef.
-        :type: str
-        """
-        
-        self._environment = environment
-
-    @property
     def argv(self):
         """
         Gets the argv of this ProcessDef.
@@ -359,6 +206,29 @@ class ProcessDef(object):
         """
         
         self._output_parameters = output_parameters
+
+    @property
+    def implementations(self):
+        """
+        Gets the implementations of this ProcessDef.
+        IDs of the corresponding implementations
+
+        :return: The implementations of this ProcessDef.
+        :rtype: list[int]
+        """
+        return self._implementations
+
+    @implementations.setter
+    def implementations(self, implementations):
+        """
+        Sets the implementations of this ProcessDef.
+        IDs of the corresponding implementations
+
+        :param implementations: The implementations of this ProcessDef.
+        :type: list[int]
+        """
+        
+        self._implementations = implementations
 
     def to_dict(self):
         """

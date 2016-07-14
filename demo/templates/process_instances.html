@@ -43,7 +43,6 @@
                 <th>ID</th>
                 <th>Name</th>
                 <th>Process Definition</th>
-                <th>Appliance</th>
                 <th>Parameters</th>
                 <th>Files</th>
             </tr>
@@ -54,7 +53,6 @@
                 <td>{{ tuple.process_instance.id }}</td>
                 <td>{{ tuple.process_instance.name }}</td>
                 <td>#{{ tuple.process_definition.id }} - {{ tuple.process_definition.name }}</td>
-                <td>{{ tuple.process_definition.appliance }}</td>
                 <td>
                     <ul>
                         {% for pair in tuple.process_instance.expanded_parameters %}

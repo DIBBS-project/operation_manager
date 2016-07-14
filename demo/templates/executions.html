@@ -52,34 +52,40 @@
 <div id="content">
     <table class="table">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Instance</th>
-                <th>Callback</th>
-                <th>Status</th>
-                <th>Info</th>
-                <th>Actions</th>
-            </tr>
+        <tr>
+            <th>ID</th>
+            <th>Process</th>
+            <th>Process Impl</th>
+            <th>Process Instance</th>
+            <th>Appliance</th>
+            <th>Callback</th>
+            <th>Status</th>
+            <th>Info</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
-        {% for execution in executions %}
+        {% for tuple in tuples %}
             <tr>
-                <td>{{ execution.id }}</td>
-                <td>#{{ execution.process_instance.id }} - {{ execution.process_instance.name }}</td>
-                <td>{{ execution.callback_url }}</td>
-                <td>{{ execution.status }}</td>
+                <td><a target="_blank" href="{% url 'execution_details' tuple.execution.id %}">Execution {{ tuple.execution.id }}</a></td>
+                <td>{{ tuple.process_def.name }} ({{ tuple.process_def.id }})</td>
+                <td>{{ tuple.process_impl.name }} ({{ tuple.process_impl.id }})</td>
+                <td>#{{ tuple.execution.process_instance.id }} - {{ tuple.execution.process_instance.name }}</td>
+                <td>{{ tuple.process_impl.appliance }} ({{ tuple.appliance.infrastructure }})</td>
+                <td>{{ tuple.execution.callback_url }}</td>
+                <td>{{ tuple.execution.status }}</td>
                 <td>
-                    {% if execution.status_info != "" %}
-                        {{ execution.status_info }}
+                    {% if tuple.execution.status_info != "" %}
+                        {{ tuple.execution.status_info }}
                     {% else %}
                         -
                     {% endif %}
                 </td>
                 <td style="text-align: center;">
-                    {% if execution.status == "PENDING" %}
-                        <a onclick="runExecution({{ execution.id }}, this);" class="btn btn-default">Run</a>
-                    {% elif execution.output_location != "" %}
-                        <a target="_blank" href="{{ execution.output_location }}" class="btn btn-default">View result</a>
+                    {% if tuple.execution.status == "PENDING" %}
+                        <a onclick="runExecution({{ tuple.execution.id }}, this);" class="btn btn-default">Run</a>
+                    {% elif tuple.execution.output_location != "" %}
+                        <a target="_blank" href="{{ tuple.execution.output_location }}" class="btn btn-default">View result</a>
                     {% else %}
                         <img src="/static/loading.gif" alt="loading">
                     {% endif %}

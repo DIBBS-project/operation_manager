@@ -43,11 +43,7 @@ class ProcessDefPatch(object):
         """
         self.swagger_types = {
             'name': 'str',
-            'appliance': 'str',
-            'archive_url': 'str',
-            'executable': 'str',
-            'cwd': 'str',
-            'environment': 'str',
+            'author': 'int',
             'argv': 'str',
             'output_type': 'str',
             'output_parameters': 'str'
@@ -55,22 +51,14 @@ class ProcessDefPatch(object):
 
         self.attribute_map = {
             'name': 'name',
-            'appliance': 'appliance',
-            'archive_url': 'archive_url',
-            'executable': 'executable',
-            'cwd': 'cwd',
-            'environment': 'environment',
+            'author': 'author',
             'argv': 'argv',
             'output_type': 'output_type',
             'output_parameters': 'output_parameters'
         }
 
         self._name = None
-        self._appliance = None
-        self._archive_url = None
-        self._executable = None
-        self._cwd = None
-        self._environment = None
+        self._author = None
         self._argv = None
         self._output_type = None
         self._output_parameters = None
@@ -99,119 +87,27 @@ class ProcessDefPatch(object):
         self._name = name
 
     @property
-    def appliance(self):
+    def author(self):
         """
-        Gets the appliance of this ProcessDefPatch.
-        Name of the appliance on which the process must be run
+        Gets the author of this ProcessDefPatch.
+        Unique ID of the user who created the process
 
-        :return: The appliance of this ProcessDefPatch.
-        :rtype: str
+        :return: The author of this ProcessDefPatch.
+        :rtype: int
         """
-        return self._appliance
+        return self._author
 
-    @appliance.setter
-    def appliance(self, appliance):
+    @author.setter
+    def author(self, author):
         """
-        Sets the appliance of this ProcessDefPatch.
-        Name of the appliance on which the process must be run
+        Sets the author of this ProcessDefPatch.
+        Unique ID of the user who created the process
 
-        :param appliance: The appliance of this ProcessDefPatch.
-        :type: str
+        :param author: The author of this ProcessDefPatch.
+        :type: int
         """
         
-        self._appliance = appliance
-
-    @property
-    def archive_url(self):
-        """
-        Gets the archive_url of this ProcessDefPatch.
-        URL of the archive to download and extract on the worker before starting the job
-
-        :return: The archive_url of this ProcessDefPatch.
-        :rtype: str
-        """
-        return self._archive_url
-
-    @archive_url.setter
-    def archive_url(self, archive_url):
-        """
-        Sets the archive_url of this ProcessDefPatch.
-        URL of the archive to download and extract on the worker before starting the job
-
-        :param archive_url: The archive_url of this ProcessDefPatch.
-        :type: str
-        """
-        
-        self._archive_url = archive_url
-
-    @property
-    def executable(self):
-        """
-        Gets the executable of this ProcessDefPatch.
-        Path to the executable
-
-        :return: The executable of this ProcessDefPatch.
-        :rtype: str
-        """
-        return self._executable
-
-    @executable.setter
-    def executable(self, executable):
-        """
-        Sets the executable of this ProcessDefPatch.
-        Path to the executable
-
-        :param executable: The executable of this ProcessDefPatch.
-        :type: str
-        """
-        
-        self._executable = executable
-
-    @property
-    def cwd(self):
-        """
-        Gets the cwd of this ProcessDefPatch.
-        Working directory to be in when ruing the process
-
-        :return: The cwd of this ProcessDefPatch.
-        :rtype: str
-        """
-        return self._cwd
-
-    @cwd.setter
-    def cwd(self, cwd):
-        """
-        Sets the cwd of this ProcessDefPatch.
-        Working directory to be in when ruing the process
-
-        :param cwd: The cwd of this ProcessDefPatch.
-        :type: str
-        """
-        
-        self._cwd = cwd
-
-    @property
-    def environment(self):
-        """
-        Gets the environment of this ProcessDefPatch.
-        JSON-formatted dictonary to give values to environment variables (can contain parameters)
-
-        :return: The environment of this ProcessDefPatch.
-        :rtype: str
-        """
-        return self._environment
-
-    @environment.setter
-    def environment(self, environment):
-        """
-        Sets the environment of this ProcessDefPatch.
-        JSON-formatted dictonary to give values to environment variables (can contain parameters)
-
-        :param environment: The environment of this ProcessDefPatch.
-        :type: str
-        """
-        
-        self._environment = environment
+        self._author = author
 
     @property
     def argv(self):

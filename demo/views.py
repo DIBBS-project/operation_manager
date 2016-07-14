@@ -1,6 +1,6 @@
 from django.shortcuts import render
 import pdapp.models as models
-from pdapp.pr_client.apis import ProcessDefinitionsApi
+from pdapp.pr_client.apis import ProcessDefinitionsApi, ProcessImplementationApi
 
 from settings import Settings
 
@@ -25,7 +25,7 @@ def process_instances(request):
 
     process_instances_list = models.ProcessInstance.objects.all()
     for process_instance in process_instances_list:
-        ret = ProcessDefinitionsApi().processdefs_id_get(id=process_instance.process_definition_id)
+        process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_instance.process_definition_id)
         process_instance.expanded_parameters = []
         for key, val in json.loads(process_instance.parameters).items():
             process_instance.expanded_parameters = process_instance.expanded_parameters + [{"key": key,
@@ -36,7 +36,7 @@ def process_instances(request):
                                                                                   "val": val}]
         exec_tuple = {
             "process_instance": process_instance,
-            "process_definition": ret,
+            "process_definition": process_def,
         }
         tuples += [exec_tuple]
 
@@ -46,16 +46,30 @@ def process_instances(request):
 def executions(request):
     executions_list = models.Execution.objects.all()
 
-    return render(request, "executions.html", {"executions": executions_list})
+    tuples = []
+    for execution in executions_list:
+        process_impl = ProcessImplementationApi().processimpls_id_get(id=execution.process_instance.process_definition_id)
+        process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
+        tuple = {
+            "execution": execution,
+            "process_impl": process_impl,
+            "process_def": process_def,
+        }
+        tuples += [tuple]
+
+    return render(request, "executions.html", {"executions": executions_list, "tuples": tuples})
 
 
 def show_details(request, pk):
 
     execution = models.Execution.objects.filter(id=pk)[0]
-    ret = ProcessDefinitionsApi().processdefs_id_get(id=execution.process_id)
+    process_impl = ProcessImplementationApi().processimpls_id_get(id=execution.process_instance.process_definition_id)
+    process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
     tuple = {
         "execution": execution,
-        "process": ret,
+        "process_impl": process_impl,
+        "process_def": process_def,
+        "appliance": process_impl.appliance,
     }
 
     return render(request, "tuple.html", {"tuple": tuple})
