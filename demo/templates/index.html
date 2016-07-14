@@ -32,6 +32,12 @@
             padding: 5px;
             border: 0px;
         }
+        .iframe_mister_cluster_tabs {
+            width: 100%;
+            height: 226px;
+            padding: 5px;
+            border: 0px;
+        }
         #content {
             padding: 20px;
             margin-top: 10px;
@@ -39,6 +45,18 @@
 
         .panel-body {
             padding: 0;
+        }
+
+        .panel-buttons {
+            position: absolute;
+            right: 30px;
+            top: 8px;
+        }
+
+        .panel-body {
+            padding-top: 10px;
+            padding-left: 1px;
+            padding-right: 2px;
         }
 
     </style>
@@ -50,34 +68,24 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">New architecture demo</a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">New architecture demo</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-              <li class="active"><a href="#">Home</a></li>
-              <li>
-                  <p class="navbar-btn" style="margin-left: 10px">
-                      <a href="{{ urls.process_registry }}/demo/processdef_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default">New process definition</a>
-                </p>
-              </li>
-              <li>
-                  <p class="navbar-btn" style="margin-left: 10px">
-                      <a href="{{ urls.process_dispatcher }}/demo/exec_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default">New execution</a>
-                </p>
-              </li>
-          </ul>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+            </ul>
         </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+    </div>
+</nav>
 
 <div id="content">
 
@@ -87,23 +95,57 @@
     <div class="row">
         <div class="col-xs-6 col-sm-6 col-lg-6">
             <div class="panel panel-default">
-              <div class="panel-heading">
-                <h3 class="panel-title">Process Registry</h3>
-              </div>
-              <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="{{ urls.process_registry }}/demo/processdefs/"></iframe>
-              </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Process Registry</h3>
+                    <div class="panel-buttons">
+                        <a href="{{ urls.process_registry }}/demo/processdef_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default btn-xs">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            Process definition
+                        </a>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#process_definitions">Process definitions</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="process_definitions" class="tab-pane fade in active">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.process_registry }}/demo/processdefs/"></iframe>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="col-xs-6 col-sm-6 col-lg-6">
             <div class="panel panel-default">
-              <div class="panel-heading">
-                <h3 class="panel-title">Process Dispatcher</h3>
-              </div>
-              <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="{{ urls.process_dispatcher }}/demo/executions/"></iframe>
-              </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Process Dispatcher</h3>
+                    <div class="panel-buttons">
+                        <a href="{{ urls.process_dispatcher }}/demo/process_instance_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default btn-xs">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            Process instance
+                        </a>
+                        <a href="{{ urls.process_dispatcher }}/demo/execution_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default btn-xs">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            Execution
+                        </a>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#process_instances">Process instances</a></li>
+                        <li><a data-toggle="tab" href="#executions">Executions</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="process_instances" class="tab-pane fade in active">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.process_dispatcher }}/demo/process_instances/"></iframe>
+                        </div>
+                        <div id="executions" class="tab-pane fade">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.process_dispatcher }}/demo/executions/"></iframe>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -112,22 +154,48 @@
     <div class="row">
         <div class="col-xs-6 col-sm-6 col-lg-6">
             <div class="panel panel-default">
-              <div class="panel-heading">
-                <h3 class="panel-title">Appliance Registry</h3>
-              </div>
-              <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="{{ urls.appliance_registry }}/demo/appliances/"></iframe>
-              </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Appliance Registry</h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#appliances">Appliances</a></li>
+                        <li><a data-toggle="tab" href="#appliance_implementations">Appliance Implementations</a></li>
+                        <li><a data-toggle="tab" href="#sites">Sites</a></li>
+                        <li><a data-toggle="tab" href="#actions">Actions</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="appliances" class="tab-pane fade in active">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.appliance_registry }}/demo/appliances/"></iframe>
+                        </div>
+                        <div id="sites" class="tab-pane fade">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.appliance_registry }}/demo/sites/"></iframe>
+                        </div>
+                        <div id="appliance_implementations" class="tab-pane fade">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.appliance_registry }}/demo/appliance_implementations/"></iframe>
+                        </div>
+                        <div id="actions" class="tab-pane fade">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.appliance_registry }}/demo/actions/"></iframe>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-xs-6 col-sm-6 col-lg-6">
             <div class="panel panel-default">
-              <div class="panel-heading">
-                <h3 class="panel-title">Resource Provisioner</h3>
-              </div>
-              <div class="panel-body">
-                  <iframe class="iframe_mister_cluster" src="{{ urls.resource_provisioner }}/demo/users/"></iframe>
-              </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Resource Provisioner</h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#users">Users</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="users" class="tab-pane fade in active">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.resource_provisioner }}/demo/users/"></iframe>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

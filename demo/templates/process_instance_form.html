@@ -3,7 +3,7 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-    <title>Demo - Create Execution</title>
+    <title>Demo - Create Process Instance</title>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -28,19 +28,19 @@
 </head>
 <body>
 <div id="content">
-    <h1>Create Execution</h1>
-    <form role="form" action="/pdapp/exec/" method="post">
+    <h1>Create Process Instance</h1>
+    <form role="form" action="/process_instances/" method="post">
         <div class="form-group">
-            <label for="mrcluster_token">Mr Cluster Token:</label>
-            <input type="text" class="form-control" id="mrcluster_token" name="mrcluster_token" required>
-        </div>
-        <div class="form-group">
-            <label for="process_id">Process ID:</label>
-            <select class="form-control" name="process_id" id="process_id" required>
+            <label for="process_definition_id">Process Definition ID:</label>
+            <select class="form-control" name="process_definition_id" id="process_definition_id" required>
                 {% for processdef in processdefs %}
                     <option value="{{ processdef.id }}">#{{ processdef.id }} - {{ processdef.name }}</option>
                 {% endfor %}
             </select>
+        </div>
+        <div class="form-group">
+            <label for="name">Name (optional):</label>
+            <input type="text" class="form-control" id="name" name="name">
         </div>
         <div class="form-group">
             <label for="parameters">Parameters (JSON dictionary):</label>
@@ -49,10 +49,6 @@
         <div class="form-group">
             <label for="files">Files (JSON dictionary):</label>
             <textarea class="form-control" rows="5" cols="50" id="files" name="files" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="callback_url">Callback URL:</label>
-            <input type="url" class="form-control" id="callback_url" name="callback_url" required>
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
     </form>

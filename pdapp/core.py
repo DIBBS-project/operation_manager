@@ -3,10 +3,11 @@ import json
 import uuid
 import logging
 
-def deploy_cluster(execution, appliance, MISTER_CLUSTER_URL):
+
+def deploy_cluster(execution, appliance, resource_provisioner_url):
 
     headers = {
-        "TOKEN": execution.mrcluster_token
+        "TOKEN": execution.resource_provisioner_token
     }
 
     execution.status = "DEPLOYING"
@@ -17,7 +18,7 @@ def deploy_cluster(execution, appliance, MISTER_CLUSTER_URL):
     cluster_creation_data = {"user_id": "1",
                              "appliance": appliance,
                              "name": "MyHadoopCluster"}
-    r = requests.post('%s/clusters/' % (MISTER_CLUSTER_URL),
+    r = requests.post('%s/clusters/' % resource_provisioner_url,
                       data=json.dumps(cluster_creation_data), headers=headers)
 
     response = json.loads(r.content)
@@ -29,7 +30,7 @@ def deploy_cluster(execution, appliance, MISTER_CLUSTER_URL):
 
     logging.info("adding a new node (master) to the cluster %s" % (cluster_id))
     node_addition_data = {"cluster_id": cluster_id}
-    r = requests.post('%s/hosts/' % (MISTER_CLUSTER_URL),
+    r = requests.post('%s/hosts/' % resource_provisioner_url,
                       data=json.dumps(node_addition_data), headers=headers)
 
     # Add a slave node to the cluster
@@ -37,7 +38,7 @@ def deploy_cluster(execution, appliance, MISTER_CLUSTER_URL):
     execution.save()
 
     logging.info("adding a new node (slave) to the cluster %s" % (cluster_id))
-    r = requests.post('%s/hosts/' % (MISTER_CLUSTER_URL),
+    r = requests.post('%s/hosts/' % resource_provisioner_url,
                       data=json.dumps(node_addition_data), headers=headers)
 
     execution.status = "DEPLOYED"
@@ -45,11 +46,11 @@ def deploy_cluster(execution, appliance, MISTER_CLUSTER_URL):
     execution.save()
 
     # Get the cluster description
-    logging.info("get a description of the cluster %s" % (cluster_id))
-    r = requests.get('%s/clusters/%s/' % (MISTER_CLUSTER_URL, cluster_id), headers=headers)
+    logging.info("get a description of the cluster %s" % cluster_id)
+    r = requests.get('%s/clusters/%s/' % (resource_provisioner_url, cluster_id), headers=headers)
     description = json.loads(r.content)
 
-    logging.info("description will be returned %s" % (description))
+    logging.info("description will be returned %s" % description)
     return description
 
 
@@ -87,7 +88,7 @@ def run_process(cluster, script, callback_url, execution):
     script_path = "tmp/%s/script_%s.sh" % (user, request_uuid)
 
     create_file(script_path, script)
-    logging.info("generated script in %s" % (script_path))
+    logging.info("generated script in %s" % script_path)
 
     REMOTE_HADOOP_WEBSERVICE_HOST="http://%s:8000" % (cluster["master_node_ip"])
 
@@ -159,12 +160,13 @@ def run_process(cluster, script, callback_url, execution):
     print (r)
 
     # Sending the result to the callback url
-    logging.info("calling the callback (%s)" % (callback_url))
-    execution.status_info = "Sending output to %s" % (callback_url)
-    execution.save()
+    if callback_url:
+        logging.info("calling the callback (%s)" % callback_url)
+        execution.status_info = "Sending output to %s" % (callback_url)
+        execution.save()
 
-    r = requests.post(callback_url, data=r.content)
-    print (r)
+        r = requests.post(callback_url, data=r.content)
+        print (r)
 
     execution.output_location = '%s/fs/download/output.txt/?token=%s' % (REMOTE_HADOOP_WEBSERVICE_HOST, token)
     execution.status = "FINISHED"
