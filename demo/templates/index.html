@@ -102,15 +102,23 @@
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                             Process definition
                         </a>
+                        <a href="{{ urls.process_registry }}/demo/processimpl_form/" data-featherlight="iframe" data-featherlight-iframe-width="850" data-featherlight-iframe-height="650" class="btn btn-default btn-xs">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            Process implementation
+                        </a>
                     </div>
                 </div>
                 <div class="panel-body">
                     <ul class="nav nav-tabs">
                         <li class="active"><a data-toggle="tab" href="#process_definitions">Process definitions</a></li>
+                        <li><a data-toggle="tab" href="#process_implementations">Process implementations</a></li>
                     </ul>
                     <div class="tab-content">
                         <div id="process_definitions" class="tab-pane fade in active">
                             <iframe class="iframe_mister_cluster_tabs" src="{{ urls.process_registry }}/demo/processdefs/"></iframe>
+                        </div>
+                        <div id="process_implementations" class="tab-pane fade">
+                            <iframe class="iframe_mister_cluster_tabs" src="{{ urls.process_registry }}/demo/processimpls/"></iframe>
                         </div>
                     </div>
                 </div>
