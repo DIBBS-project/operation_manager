@@ -30,11 +30,16 @@ from .models.error import Error
 from .models.process_def import ProcessDef
 from .models.process_def_patch import ProcessDefPatch
 from .models.process_def_post import ProcessDefPost
+from .models.process_impl import ProcessImpl
+from .models.process_impl_patch import ProcessImplPatch
+from .models.process_impl_post import ProcessImplPost
 from .models.token_resp import TokenResp
 from .models.user import User
 
 # import apis into sdk package
 from .apis.process_definitions_api import ProcessDefinitionsApi
+from .apis.process_implementation_api import ProcessImplementationApi
+from .apis.process_implementations_api import ProcessImplementationsApi
 from .apis.users_api import UsersApi
 
 # import ApiClient

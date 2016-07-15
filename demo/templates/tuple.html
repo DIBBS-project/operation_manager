@@ -46,17 +46,17 @@
     <h3>Process</h3>
     <hr>
     <dl>
-        <dt>id</dt><dd>{{ tuple.process.id }}</dd>
-        <dt>name</dt><dd>{{ tuple.process.name }}</dd>
-        <dt>archive_url</dt><dd>{{ tuple.process.archive_url }}</dd>
-        <dt>adapters</dt><dd>{{ tuple.process.adapters}}</dd>
+        <dt>proces_definition</dt><dd>{{ tuple.process_def.name }}</dd>
+        <dt>proces_implementation</dt><dd>{{ tuple.process_impl.name }}</dd>
+{#        <dt>name</dt><dd>{{ tuple.process.name }}</dd>#}
+        <dt>archive_url</dt><dd>{{ tuple.process_impl.archive_url }}</dd>
+{#        <dt>adapters</dt><dd>{{ tuple.process.adapters}}</dd>#}
     </dl>
 
    <h3>Appliance</h3>
     <hr>
     <dl>
-        <dt>name</dt><dd>{{ tuple.appliance.name}}</dd>
-        <dt>infrastructure</dt><dd>{{ tuple.appliance.infrastructure }}</dd>
+        <dt>name</dt><dd>{{ tuple.appliance}}</dd>
     </dl>
 </div>
 </body>
