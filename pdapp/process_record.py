@@ -32,12 +32,12 @@ def set_variables(process_def, process_impl, parameters):
         if u'file_path' in process_def.output_parameters:
             process_def.output_parameters[u'file_path']\
                 = replace_all_occurrences(
-                process_def.output_parameters[u'file_path'],
+                    process_def.output_parameters[u'file_path'],
                     pattern,
                     parameters
                 )
 
-    return (process_def, process_impl)
+    return process_def, process_impl
 
 
 def fileneames_dictionary(files):
@@ -56,7 +56,7 @@ def set_files(process_def, process_impl, filenames):
     for env in process_impl.environment:
         process_impl.environment[env] = replace_all_occurrences(process_impl.environment[env], pattern, filenames)
 
-    return (process_def, process_impl)
+    return process_def, process_impl
 
 
 def get_bash_script(process_def, process_impl, files, fileneames):
