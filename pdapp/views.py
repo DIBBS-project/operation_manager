@@ -4,7 +4,7 @@ from pdapp.serializers import ExecutionSerializer, ProcessInstanceSerializer, Us
 from rest_framework import viewsets, permissions, status
 from django.views.decorators.csrf import csrf_exempt
 
-from pdapp.pr_client.apis import ProcessImplementationsApi
+from pdapp.pr_client.apis import ProcessImplementationsApi, ProcessDefinitionsApi
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -116,8 +116,13 @@ def run_execution(request, pk):
         execution.save()
 
         # Check that the process definition exists
-        process_instance_id = execution.process_instance.process_definition_id
-        process_impl = ProcessImplementationsApi().processimpls_id_get(id=process_instance_id)
+        process_instance = execution.process_instance
+        process_definition = ProcessDefinitionsApi().processdefs_id_get(id=process_instance.process_definition_id)
+
+
+        # FIXME: the chosen process implementation is always the first one
+        process_impl_id = process_definition.implementations[0]
+        process_impl = ProcessImplementationsApi().processimpls_id_get(id=process_impl_id)
 
         if process_impl.argv == "":
             process_impl.argv = []
@@ -146,11 +151,25 @@ def run_execution(request, pk):
 
         callback_url = execution.callback_url
 
+    except:
+        execution.status = "FAILED"
+        execution.status_info = "Incorrect process definition or parameters"
+        execution.save()
+        return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
+
+    try:
         # Call Mr Cluster
 
         logging.info("Creating a virtual cluster")
         cluster = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
 
+    except:
+        execution.status = "FAILED"
+        execution.status_info = "Error while deploying the cluster"
+        execution.save()
+        return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
+
+    try:
         logging.info("Running a process on the cluster %s" % cluster)
         run_process(cluster, script, callback_url, execution)
 
@@ -158,6 +177,6 @@ def run_execution(request, pk):
 
     except:
         execution.status = "FAILED"
-        execution.status_info = "Incorrect process definition or parameters"
+        execution.status_info = "Error while running the process"
         execution.save()
         return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
