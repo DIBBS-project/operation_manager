@@ -1,10 +1,11 @@
 from django.shortcuts import render
 import pdapp.models as models
-from pdapp.pr_client.apis import ProcessDefinitionsApi, ProcessImplementationApi
+from pdapp.pr_client.apis import ProcessDefinitionsApi, ProcessImplementationsApi
 
 from settings import Settings
 
-import re, json
+import re
+import json
 
 
 # Index that provides a description of the API
@@ -48,14 +49,16 @@ def executions(request):
 
     tuples = []
     for execution in executions_list:
-        process_impl = ProcessImplementationApi().processimpls_id_get(id=execution.process_instance.process_definition_id)
+        process_impl = ProcessImplementationsApi().processimpls_id_get(
+            id=execution.process_instance.process_definition_id
+        )
         process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
-        tuple = {
+        all_tuple = {
             "execution": execution,
             "process_impl": process_impl,
             "process_def": process_def,
         }
-        tuples += [tuple]
+        tuples += [all_tuple]
 
     return render(request, "executions.html", {"executions": executions_list, "tuples": tuples})
 
@@ -63,16 +66,16 @@ def executions(request):
 def show_details(request, pk):
 
     execution = models.Execution.objects.filter(id=pk)[0]
-    process_impl = ProcessImplementationApi().processimpls_id_get(id=execution.process_instance.process_definition_id)
+    process_impl = ProcessImplementationsApi().processimpls_id_get(id=execution.process_instance.process_definition_id)
     process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
-    tuple = {
+    all_tuple = {
         "execution": execution,
         "process_impl": process_impl,
         "process_def": process_def,
         "appliance": process_impl.appliance,
     }
 
-    return render(request, "tuple.html", {"tuple": tuple})
+    return render(request, "tuple.html", {"tuple": all_tuple})
 
 
 def create_process_instance(request):
