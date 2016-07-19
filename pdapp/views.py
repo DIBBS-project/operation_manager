@@ -9,6 +9,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
+
 from settings import Settings
 
 import logging
@@ -102,7 +104,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 def run_execution(request, pk):
     from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
-    from pdapp.core import deploy_cluster, run_process
+    from pdapp.core import get_clusters, deploy_cluster, run_process
     import json
 
     try:
@@ -159,9 +161,11 @@ def run_execution(request, pk):
 
     try:
         # Call Mr Cluster
-
-        logging.info("Creating a virtual cluster")
-        cluster = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
+        clusters = get_clusters(Settings().resource_provisioner_url)
+        cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters)
+        if cluster_to_use is None:
+            logging.info("Creating a virtual cluster")
+            cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
 
     except:
         execution.status = "FAILED"
@@ -170,8 +174,8 @@ def run_execution(request, pk):
         return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
 
     try:
-        logging.info("Running a process on the cluster %s" % cluster)
-        run_process(cluster, script, callback_url, execution)
+        logging.info("Running a process on the cluster %s" % cluster_to_use)
+        run_process(cluster_to_use, script, callback_url, execution)
 
         return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
 
