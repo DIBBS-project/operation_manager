@@ -4,6 +4,12 @@ import uuid
 import logging
 
 
+def get_clusters(resource_provisioner_url):
+    r = requests.get('%s/clusters/' % resource_provisioner_url, headers={})
+    response = json.loads(r.content)
+    return response
+
+
 def deploy_cluster(execution, appliance, resource_provisioner_url):
 
     headers = {
