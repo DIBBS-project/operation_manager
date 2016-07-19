@@ -1,14 +1,10 @@
-from pdapp.permissions import IsOwnerOrReadOnly
-
-# Create your views here.
-
 from django.contrib.auth.models import User
 from pdapp.models import Execution, ProcessInstance
 from pdapp.serializers import ExecutionSerializer, ProcessInstanceSerializer, UserSerializer
 from rest_framework import viewsets, permissions, status
 from django.views.decorators.csrf import csrf_exempt
 
-from pdapp.pr_client.apis import ProcessDefinitionsApi, ProcessImplementationApi
+from pdapp.pr_client.apis import ProcessImplementationsApi
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -105,7 +101,6 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @csrf_exempt
 def run_execution(request, pk):
-    from pr_client.apis import ProcessDefinitionsApi
     from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
     from pdapp.core import deploy_cluster, run_process
     import json
@@ -122,21 +117,20 @@ def run_execution(request, pk):
 
         # Check that the process definition exists
         process_instance_id = execution.process_instance.process_definition_id
-        process_impl = ProcessImplementationApi().processimpls_id_get(id=process_instance_id)
-        process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
+        process_impl = ProcessImplementationsApi().processimpls_id_get(id=process_instance_id)
 
-        if process_def.argv == "":
-            process_def.argv = []
+        if process_impl.argv == "":
+            process_impl.argv = []
         else:
-            process_def.argv = json.loads(process_def.argv)
+            process_impl.argv = json.loads(process_impl.argv)
         if process_impl.environment == "":
             process_impl.environment = {}
         else:
             process_impl.environment = json.loads(process_impl.environment)
-        if process_def.output_parameters == "":
-            process_def.output_parameters = {}
+        if process_impl.output_parameters == "":
+            process_impl.output_parameters = {}
         else:
-            process_def.output_parameters = json.loads(process_def.output_parameters)
+            process_impl.output_parameters = json.loads(process_impl.output_parameters)
 
         # Get all the required information
         appliance = process_impl.appliance
@@ -144,10 +138,10 @@ def run_execution(request, pk):
         files = json.loads(execution.process_instance.files)
 
         filenames = fileneames_dictionary(files)
-        (process_def, process_impl) = set_variables(process_def, process_impl, parameters)
-        (process_def, process_impl) = set_files(process_def, process_impl, filenames)
+        set_variables(process_impl, parameters)
+        set_files(process_impl, filenames)
 
-        script = get_bash_script(process_def, process_impl, files, filenames)
+        script = get_bash_script(process_impl, files, filenames)
         print (script)
 
         callback_url = execution.callback_url

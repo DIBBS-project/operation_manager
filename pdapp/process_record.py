@@ -19,25 +19,23 @@ def replace_all_occurrences(string, pattern, parameters):
     return string
 
 
-def set_variables(process_def, process_impl, parameters):
+def set_variables(process_impl, parameters):
     pattern = re.compile(r'\$\{(.*)\}')
 
-    for i in range(len(process_def.argv)):
-        process_def.argv[i] = replace_all_occurrences(process_def.argv[i], pattern, parameters)
+    for i in range(len(process_impl.argv)):
+        process_impl.argv[i] = replace_all_occurrences(process_impl.argv[i], pattern, parameters)
 
     for env in process_impl.environment:
         process_impl.environment[env] = replace_all_occurrences(process_impl.environment[env], pattern, parameters)
 
-    if process_def.output_type == u'file':
-        if u'file_path' in process_def.output_parameters:
-            process_def.output_parameters[u'file_path']\
+    if process_impl.output_type == u'file':
+        if u'file_path' in process_impl.output_parameters:
+            process_impl.output_parameters[u'file_path']\
                 = replace_all_occurrences(
-                process_def.output_parameters[u'file_path'],
+                process_impl.output_parameters[u'file_path'],
                     pattern,
                     parameters
                 )
-
-    return (process_def, process_impl)
 
 
 def fileneames_dictionary(files):
@@ -47,19 +45,17 @@ def fileneames_dictionary(files):
     return rfiles
 
 
-def set_files(process_def, process_impl, filenames):
+def set_files(process_impl, filenames):
     pattern = re.compile(r'@\{(.*)\}')
 
-    for i in range(len(process_def.argv)):
-        process_def.argv[i] = replace_all_occurrences(process_def.argv[i], pattern, filenames)
+    for i in range(len(process_impl.argv)):
+        process_impl.argv[i] = replace_all_occurrences(process_impl.argv[i], pattern, filenames)
 
     for env in process_impl.environment:
         process_impl.environment[env] = replace_all_occurrences(process_impl.environment[env], pattern, filenames)
 
-    return (process_def, process_impl)
 
-
-def get_bash_script(process_def, process_impl, files, fileneames):
+def get_bash_script(process_impl, files, fileneames):
     script = u''
 
     for env in process_impl.environment:
@@ -79,7 +75,7 @@ def get_bash_script(process_def, process_impl, files, fileneames):
             script += u'curl ' + files[key] + u' > ' + fileneames[key] + u'\n'
 
     script += u'\n' + process_impl.executable
-    for arg in process_def.argv:
+    for arg in process_impl.argv:
         script += u' ' + arg
     script += u'\n'
 
