@@ -24,6 +24,7 @@ class Execution(models.Model):
     author = models.ForeignKey('auth.User', related_name='executions', on_delete=models.CASCADE)
     process_instance = models.ForeignKey(ProcessInstance, related_name='executions', on_delete=models.CASCADE)
     callback_url = models.CharField(max_length=2048, blank=True, default='')
+    force_spawn_cluster = models.CharField(max_length=8, blank=True, default='')
     creation_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=2048, blank=True, default='NEW')
     status_info = models.CharField(max_length=2048, blank=True, default='')

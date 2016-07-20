@@ -162,7 +162,7 @@ def run_execution(request, pk):
     try:
         # Call Mr Cluster
         clusters = get_clusters(Settings().resource_provisioner_url)
-        cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters)
+        cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters, force_new=execution.force_spawn_cluster!='')
         if cluster_to_use is None:
             logging.info("Creating a virtual cluster")
             cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
