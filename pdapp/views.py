@@ -14,6 +14,7 @@ from sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 from settings import Settings
 
 import logging
+import traceback
 
 logging.basicConfig(level=logging.INFO)
 
@@ -110,6 +111,7 @@ def run_execution(request, pk):
     try:
         execution = Execution.objects.get(pk=pk)
     except:
+        traceback.print_exc()
         return Response({"status": "failed"}, status=status.HTTP_404_NOT_FOUND)
 
     try:
@@ -154,6 +156,7 @@ def run_execution(request, pk):
         callback_url = execution.callback_url
 
     except:
+        traceback.print_exc()
         execution.status = "FAILED"
         execution.status_info = "Incorrect process definition or parameters"
         execution.save()
@@ -168,6 +171,7 @@ def run_execution(request, pk):
             cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
 
     except:
+        traceback.print_exc()
         execution.status = "FAILED"
         execution.status_info = "Error while deploying the cluster"
         execution.save()
@@ -180,6 +184,7 @@ def run_execution(request, pk):
         return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
 
     except:
+        traceback.print_exc()
         execution.status = "FAILED"
         execution.status_info = "Error while running the process"
         execution.save()

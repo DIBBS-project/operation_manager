@@ -39,13 +39,13 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
     r = requests.post('%s/hosts/' % resource_provisioner_url,
                       data=json.dumps(node_addition_data), headers=headers)
 
-    # Add a slave node to the cluster
-    execution.status_info = "Adding slave node"
-    execution.save()
-
-    logging.info("adding a new node (slave) to the cluster %s" % (cluster_id))
-    r = requests.post('%s/hosts/' % resource_provisioner_url,
-                      data=json.dumps(node_addition_data), headers=headers)
+    # # Add a slave node to the cluster
+    # execution.status_info = "Adding slave node"
+    # execution.save()
+    #
+    # logging.info("adding a new node (slave) to the cluster %s" % (cluster_id))
+    # r = requests.post('%s/hosts/' % resource_provisioner_url,
+    #                   data=json.dumps(node_addition_data), headers=headers)
 
     execution.status = "DEPLOYED"
     execution.status_info = ""
