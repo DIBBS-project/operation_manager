@@ -25,6 +25,7 @@ class ExecutionSerializer(serializers.ModelSerializer):
                   'author',
                   'process_instance',
                   'callback_url',
+                  'force_spawn_cluster',
                   'creation_date',
                   'status',
                   'status_info',

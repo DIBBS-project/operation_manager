@@ -50,6 +50,7 @@ class ProcessInstanceViewSet(viewsets.ModelViewSet):
     # Override to set the user of the request using the credentials provided to perform the request.
     def create(self, request, *args, **kwargs):
         from pr_client.apis import ProcessDefinitionsApi
+        import json
 
         data2 = {}
         for key in request.data:
@@ -62,6 +63,19 @@ class ProcessInstanceViewSet(viewsets.ModelViewSet):
         # Check that the process definition exists
         process_definition_id = data2[u'process_definition_id']
         ProcessDefinitionsApi().processdefs_id_get(id=process_definition_id)
+
+        # Check that the parameters are valid JSON
+        if data2[u'parameters']:
+            try:
+                json.loads(data2[u'parameters'])
+            except:
+                return Response({"error": "Invalid format for parameters"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if data2[u'files']:
+            try:
+                json.loads(data2[u'files'])
+            except:
+                return Response({"error": "Invalid format for files"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Save in the database
         self.perform_create(serializer)
@@ -165,7 +179,7 @@ def run_execution(request, pk):
     try:
         # Call Mr Cluster
         clusters = get_clusters(Settings().resource_provisioner_url)
-        cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters)
+        cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters, force_new=execution.force_spawn_cluster!='')
         if cluster_to_use is None:
             logging.info("Creating a virtual cluster")
             cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)

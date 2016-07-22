@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Process Dispatcher API
   description: Execute processes with the Process Dispatcher API.
-  version: "0.1.2"
+  version: "0.1.3"
 # the domain of the service
 host: 127.0.0.1:8001
 # array of all schemes that your API supports
@@ -537,6 +537,9 @@ definitions:
       callback_url:
         type: string
         description: URL called after completion of the job (possibly empty)
+      force_spawn_cluster:
+        type: string
+        description: If set and not empty, forces the creation of a new cluster
       creation_date:
         type: string
         format: date-time
@@ -565,6 +568,9 @@ definitions:
       callback_url:
         type: string
         description: URL called after completion of the job (possibly empty)
+      force_spawn_cluster:
+        type: string
+        description: If set and not empty, forces the creation of a new cluster
       resource_provisioner_token:
         type: string
         description: Authentication token to be used to connect to the Resource Provisioner
@@ -577,6 +583,9 @@ definitions:
       callback_url:
         type: string
         description: URL called after completion of the job (possibly empty)
+      force_spawn_cluster:
+        type: string
+        description: If set and not empty, forces the creation of a new cluster
       resource_provisioner_token:
         type: string
         description: Authentication token to be used to connect to the Resource Provisioner
