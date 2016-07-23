@@ -64,7 +64,7 @@ def get_bash_script(process_impl, files, fileneames):
     if process_impl.cwd is not u'':
         script += u'\ncd ' + process_impl.cwd + u'\n'
 
-    if process_impl.archive_url is not None and process_impl.archive_url is not "":
+    if process_impl.archive_url:
         script += u'\ncurl ' + process_impl.archive_url + u' > __archive.tar.gz\n' +\
                   u'tar -xzf __archive.tar.gz\n' +\
                   u'rm -f __archive.tar.gz\n'
