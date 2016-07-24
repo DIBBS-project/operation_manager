@@ -10,12 +10,13 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
+from requests.exceptions import ConnectionError
 
 from settings import Settings
 
 import logging
 import traceback
-
+import time
 logging.basicConfig(level=logging.INFO)
 
 
@@ -191,15 +192,20 @@ def run_execution(request, pk):
         execution.save()
         return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
 
-    try:
-        logging.info("Running a process on the cluster %s" % cluster_to_use)
-        run_process(cluster_to_use, script, callback_url, execution)
+    retry_count = 0
+    while retry_count < 10:
+        try:
+            logging.info("Running a process on the cluster %s" % cluster_to_use)
+            run_process(cluster_to_use, script, callback_url, execution)
 
-        return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
-
-    except:
-        traceback.print_exc()
-        execution.status = "FAILED"
-        execution.status_info = "Error while running the process"
-        execution.save()
-        return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
+            return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
+        except ConnectionError as e:
+            logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
+            retry_count += 1
+            time.sleep(5)
+        except:
+            traceback.print_exc()
+            execution.status = "FAILED"
+            execution.status_info = "Error while running the process"
+            execution.save()
+            return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)

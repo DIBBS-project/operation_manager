@@ -2,7 +2,11 @@ import requests, os
 import json
 import uuid
 import logging
-
+import os
+import re
+import time
+import sys
+import thread
 
 def get_clusters(resource_provisioner_url):
     r = requests.get('%s/clusters/' % resource_provisioner_url, headers={})
@@ -39,13 +43,61 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
     r = requests.post('%s/hosts/' % resource_provisioner_url,
                       data=json.dumps(node_addition_data), headers=headers)
 
-    # # Add a slave node to the cluster
-    # execution.status_info = "Adding slave node"
-    # execution.save()
+    # from threading import Thread
     #
-    # logging.info("adding a new node (slave) to the cluster %s" % (cluster_id))
-    # r = requests.post('%s/hosts/' % resource_provisioner_url,
-    #                   data=json.dumps(node_addition_data), headers=headers)
+    # def add_slave(params):
+    #     logging.info("adding a new node (slave %s/%s) to the cluster %s" % (params["i"], params["nb_nodes"]-1, params["cluster_id"]))
+    #     # Add a slave node to the cluster
+    #     execution.status_info = "Adding slave node (%s/%s)" % (params["i"], params["nb_nodes"]-1)
+    #     execution.save()
+    #
+    #     logging.info("adding a new node (slave) to the cluster %s" % (params["cluster_id"]))
+    #     node_addition_data["name"] = "myhadoopcluster%s" % (params["i"])
+    #     r = requests.post('%s/hosts/' % params["resource_provisioner_url"],
+    #                       data=json.dumps(params["node_addition_data"]), headers=params["headers"])
+    #
+    # class thread_it(Thread):
+    #
+    #     def __init__(self, params):
+    #         Thread.__init__(self)
+    #         self.params = params
+    #
+    #     def run(self):
+    #         # mutex.acquire()
+    #         add_slave(self.params)
+    #         # mutex.release()
+    #
+    # nb_nodes = 3
+    #
+    # threads = []
+    # mutex = thread.allocate_lock()
+    #
+    # for i in range(1, nb_nodes):
+    #     params = {}
+    #     params["i"] = i+1
+    #     params["nb_nodes"] = nb_nodes
+    #     params["cluster_id"] = cluster_id
+    #     params["cluster_id"] = cluster_id
+    #     params["resource_provisioner_url"] = resource_provisioner_url
+    #     params["node_addition_data"] = node_addition_data
+    #     params["headers"] = headers
+    #     current = thread_it(params)
+    #     threads.append(current)
+    #     current.start()
+    #
+    # for t in threads:
+    #     t.join()
+
+    nb_nodes = 2
+    for i in range(1, nb_nodes):
+        logging.info("adding a new node (slave %s/%s) to the cluster %s" % (i, nb_nodes-1, cluster_id))
+        # Add a slave node to the cluster
+        execution.status_info = "Adding slave node (%s/%s)" % (i, nb_nodes-1)
+        execution.save()
+
+        logging.info("adding a new node (slave) to the cluster %s" % (cluster_id))
+        r = requests.post('%s/hosts/' % resource_provisioner_url,
+                          data=json.dumps(node_addition_data), headers=headers)
 
     execution.status = "DEPLOYED"
     execution.status_info = ""
@@ -118,6 +170,8 @@ def run_process(cluster, script, callback_url, execution):
     r = requests.get('%s/generate_new_token/' % (REMOTE_HADOOP_WEBSERVICE_HOST), headers=headers)
     response = json.loads(r.content)
     token = response["token"]
+
+    logging.info("TOKEN: %s" % (token))
 
     headers = {
         "token": token
