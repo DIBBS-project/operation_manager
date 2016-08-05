@@ -143,14 +143,6 @@ def run_execution(request, pk):
         process_impl_id = process_definition.implementations[0]
         process_impl = ProcessImplementationsApi().processimpls_id_get(id=process_impl_id)
 
-        if process_impl.argv == "":
-            process_impl.argv = []
-        else:
-            process_impl.argv = json.loads(process_impl.argv)
-        if process_impl.environment == "":
-            process_impl.environment = {}
-        else:
-            process_impl.environment = json.loads(process_impl.environment)
         if process_impl.output_parameters == "":
             process_impl.output_parameters = {}
         else:
