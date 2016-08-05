@@ -20,7 +20,7 @@ def replace_all_occurrences(string, pattern, parameters):
 
 
 def set_variables(process_impl, parameters):
-    pattern = re.compile(r'\$\{(.*)\}')
+    pattern = re.compile(r'!\{([^\}]*)\}')
 
     process_impl.script = replace_all_occurrences(process_impl.script, pattern, parameters)
 
@@ -42,7 +42,7 @@ def fileneames_dictionary(files):
 
 
 def set_files(process_impl, filenames):
-    pattern = re.compile(r'@\{(.*)\}')
+    pattern = re.compile(r'@\{([^\}]*)\}')
 
     process_impl.script = replace_all_occurrences(process_impl.script, pattern, filenames)
 
