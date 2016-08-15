@@ -15,34 +15,32 @@ def get_clusters(resource_provisioner_url):
 
 
 def deploy_cluster(execution, appliance, resource_provisioner_url):
+    from rp_client.apis import ClusterDefinitionsApi
+    from rp_client.configure import configure_auth_basic
 
-    headers = {
-        "TOKEN": execution.resource_provisioner_token
-    }
+    configure_auth_basic("admin", "pass")  # TODO: Change when the central authentication system is here
 
     execution.status = "DEPLOYING"
     execution.status_info = "Creating virtual cluster"
     execution.save()
 
     logging.info("creating the logical cluster")
-    cluster_creation_data = {"user_id": "1",
+    cluster_creation_data = {"user_id": "1",  # TODO: Remove (update the swagger client to >= 0.1.11 first)
                              "appliance": appliance,
                              "name": "MyHadoopCluster"}
-    r = requests.post('%s/clusters/' % resource_provisioner_url,
-                      data=json.dumps(cluster_creation_data), headers=headers)
-
-    response = json.loads(r.content)
-    cluster_id = response["cluster_id"]
+    response = ClusterDefinitionsApi().clusters_post(data=cluster_creation_data)
+    cluster_id = response.id
 
     # Add a master node to the cluster
     execution.status_info = "Adding master node"
     execution.save()
 
-    logging.info("adding a new node (master) to the cluster %s" % (cluster_id))
+    logging.info("adding a new node (master) to the cluster %s" % (cluster_id,))
     node_addition_data = {"cluster_id": cluster_id}
     r = requests.post('%s/hosts/' % resource_provisioner_url,
-                      data=json.dumps(node_addition_data), headers=headers)
+                      data=json.dumps(node_addition_data))
 
+    # TODO: This was an attempt to parallelize the addition of slaves, find a way to make it work
     # from threading import Thread
     #
     # def add_slave(params):
@@ -95,9 +93,9 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
         execution.status_info = "Adding slave node (%s/%s)" % (i, nb_nodes-1)
         execution.save()
 
-        logging.info("adding a new node (slave) to the cluster %s" % (cluster_id))
+        logging.info("adding a new node (slave) to the cluster %s" % (cluster_id,))
         r = requests.post('%s/hosts/' % resource_provisioner_url,
-                          data=json.dumps(node_addition_data), headers=headers)
+                          data=json.dumps(node_addition_data))
 
     execution.status = "DEPLOYED"
     execution.status_info = ""
@@ -105,8 +103,7 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
 
     # Get the cluster description
     logging.info("get a description of the cluster %s" % cluster_id)
-    r = requests.get('%s/clusters/%s/' % (resource_provisioner_url, cluster_id), headers=headers)
-    description = json.loads(r.content)
+    description = ClusterDefinitionsApi().clusters_id_get(id=cluster_id)
 
     logging.info("description will be returned %s" % description)
     return description
@@ -123,12 +120,12 @@ def run_process(cluster, script, callback_url, execution):
     user = "user"
     password = "password"
 
-    logging.info("launching script (request_uuid=%s)" % (request_uuid))
+    logging.info("launching script (request_uuid=%s)" % (request_uuid,))
 
     execution.status_info = "Generating temporary folder"
     execution.save()
 
-    def create_file(path, data):
+    def create_file(path, fdata):
         # Delete file if it already exists
         if os.path.exists(path):
             os.remove(path)
@@ -137,7 +134,7 @@ def run_process(cluster, script, callback_url, execution):
             os.makedirs(englobing_folder)
         # Write data in a new file
         with open(path, "w+") as f:
-            f.write(data)
+            f.write(fdata)
         return True
 
     execution.status_info = "Generating script.sh"
@@ -148,17 +145,17 @@ def run_process(cluster, script, callback_url, execution):
     create_file(script_path, script)
     logging.info("generated script in %s" % script_path)
 
-    REMOTE_HADOOP_WEBSERVICE_HOST="http://%s:8000" % (cluster["master_node_ip"])
+    REMOTE_HADOOP_WEBSERVICE_HOST="http://%s:8000" % (cluster.master_node_ip,)
 
     execution.status_info = "Creating user"
     execution.save()
 
-    logging.info("ensuring that the user %s exists" % (user))
+    logging.info("ensuring that the user %s exists" % (user,))
     data = {
         "username": user,
         "password": password
     }
-    r = requests.post('%s/register_new_user/' % (REMOTE_HADOOP_WEBSERVICE_HOST), data=data)
+    r = requests.post('%s/register_new_user/' % (REMOTE_HADOOP_WEBSERVICE_HOST,), data=data)
     response = json.loads(r.content)
 
     headers = {
@@ -166,12 +163,12 @@ def run_process(cluster, script, callback_url, execution):
         "password": password
     }
 
-    logging.info("generating a new token for %s" % (user))
-    r = requests.get('%s/generate_new_token/' % (REMOTE_HADOOP_WEBSERVICE_HOST), headers=headers)
+    logging.info("generating a new token for %s" % (user,))
+    r = requests.get('%s/generate_new_token/' % (REMOTE_HADOOP_WEBSERVICE_HOST,), headers=headers)
     response = json.loads(r.content)
     token = response["token"]
 
-    logging.info("TOKEN: %s" % (token))
+    logging.info("TOKEN: %s" % (token,))
 
     headers = {
         "token": token
