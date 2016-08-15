@@ -138,8 +138,8 @@ def run_execution(request, pk):
         process_instance = execution.process_instance
         process_definition = ProcessDefinitionsApi().processdefs_id_get(id=process_instance.process_definition_id)
 
-
         # FIXME: the chosen process implementation is always the first one
+        # UPDATE: New architecture: No process implementation but process version, it will be fixed when changing this
         process_impl_id = process_definition.implementations[0]
         process_impl = ProcessImplementationsApi().processimpls_id_get(id=process_impl_id)
 
