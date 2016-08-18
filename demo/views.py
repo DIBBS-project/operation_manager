@@ -55,7 +55,6 @@ def executions(request):
         process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
         all_tuple = {
             "execution": execution,
-            "process_impl": process_impl,
             "process_def": process_def,
         }
         tuples += [all_tuple]

@@ -55,10 +55,9 @@
         <tr>
             <th>ID</th>
             <th>Process</th>
-            <th>Process Implementation</th>
             <th>Process Instance</th>
-            <th>Appliance</th>
             <th>Callback</th>
+            <th>Force Spawn Cluster</th>
             <th>Status</th>
             <th>Info</th>
             <th>Actions</th>
@@ -69,10 +68,9 @@
             <tr>
                 <td><a target="_blank" href="{% url 'execution_details' tuple.execution.id %}">{{ tuple.execution.id }}</a></td>
                 <td>#{{ tuple.process_def.id }} - {{ tuple.process_def.name }}</td>
-                <td>#{{ tuple.process_impl.id }} - {{ tuple.process_impl.name }}</td>
                 <td>#{{ tuple.execution.process_instance.id }} - {{ tuple.execution.process_instance.name }}</td>
-                <td>{{ tuple.process_impl.appliance }}</td>
                 <td>{{ tuple.execution.callback_url }}</td>
+                <td>{{ tuple.execution.force_spawn_cluster }}</td>
                 <td>{{ tuple.execution.status }}</td>
                 <td>
                     {% if tuple.execution.status_info != "" %}

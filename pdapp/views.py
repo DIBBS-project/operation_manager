@@ -4,15 +4,19 @@ from pdapp.serializers import ExecutionSerializer, ProcessInstanceSerializer, Us
 from rest_framework import viewsets, permissions, status
 from django.views.decorators.csrf import csrf_exempt
 
-from pdapp.pr_client.apis import ProcessImplementationsApi
+from pdapp.pr_client.apis import ProcessImplementationsApi, ProcessDefinitionsApi
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
+from requests.exceptions import ConnectionError
+
 from settings import Settings
 
 import logging
-
+import traceback
+import time
 logging.basicConfig(level=logging.INFO)
 
 
@@ -47,6 +51,7 @@ class ProcessInstanceViewSet(viewsets.ModelViewSet):
     # Override to set the user of the request using the credentials provided to perform the request.
     def create(self, request, *args, **kwargs):
         from pr_client.apis import ProcessDefinitionsApi
+        import json
 
         data2 = {}
         for key in request.data:
@@ -59,6 +64,19 @@ class ProcessInstanceViewSet(viewsets.ModelViewSet):
         # Check that the process definition exists
         process_definition_id = data2[u'process_definition_id']
         ProcessDefinitionsApi().processdefs_id_get(id=process_definition_id)
+
+        # Check that the parameters are valid JSON
+        if data2[u'parameters']:
+            try:
+                json.loads(data2[u'parameters'])
+            except:
+                return Response({"error": "Invalid format for parameters"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if data2[u'files']:
+            try:
+                json.loads(data2[u'files'])
+            except:
+                return Response({"error": "Invalid format for files"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Save in the database
         self.perform_create(serializer)
@@ -102,12 +120,13 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 def run_execution(request, pk):
     from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
-    from pdapp.core import deploy_cluster, run_process
+    from pdapp.core import get_clusters, deploy_cluster, run_process
     import json
 
     try:
         execution = Execution.objects.get(pk=pk)
     except:
+        traceback.print_exc()
         return Response({"status": "failed"}, status=status.HTTP_404_NOT_FOUND)
 
     try:
@@ -116,17 +135,14 @@ def run_execution(request, pk):
         execution.save()
 
         # Check that the process definition exists
-        process_instance_id = execution.process_instance.process_definition_id
-        process_impl = ProcessImplementationsApi().processimpls_id_get(id=process_instance_id)
+        process_instance = execution.process_instance
+        process_definition = ProcessDefinitionsApi().processdefs_id_get(id=process_instance.process_definition_id)
 
-        if process_impl.argv == "":
-            process_impl.argv = []
-        else:
-            process_impl.argv = json.loads(process_impl.argv)
-        if process_impl.environment == "":
-            process_impl.environment = {}
-        else:
-            process_impl.environment = json.loads(process_impl.environment)
+        # FIXME: the chosen process implementation is always the first one
+        # UPDATE: New architecture: No process implementation but process version, it will be fixed when changing this
+        process_impl_id = process_definition.implementations[0]
+        process_impl = ProcessImplementationsApi().processimpls_id_get(id=process_impl_id)
+
         if process_impl.output_parameters == "":
             process_impl.output_parameters = {}
         else:
@@ -146,18 +162,42 @@ def run_execution(request, pk):
 
         callback_url = execution.callback_url
 
-        # Call Mr Cluster
-
-        logging.info("Creating a virtual cluster")
-        cluster = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
-
-        logging.info("Running a process on the cluster %s" % cluster)
-        run_process(cluster, script, callback_url, execution)
-
-        return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
-
     except:
+        traceback.print_exc()
         execution.status = "FAILED"
         execution.status_info = "Incorrect process definition or parameters"
         execution.save()
         return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
+
+    try:
+        # Call Mr Cluster
+        clusters = get_clusters(Settings().resource_provisioner_url)
+        cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters, force_new=execution.force_spawn_cluster!='')
+        if cluster_to_use is None:
+            logging.info("Creating a virtual cluster")
+            cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
+
+    except:
+        traceback.print_exc()
+        execution.status = "FAILED"
+        execution.status_info = "Error while deploying the cluster"
+        execution.save()
+        return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
+
+    retry_count = 0
+    while retry_count < 10:
+        try:
+            logging.info("Running a process on the cluster %s" % cluster_to_use)
+            run_process(cluster_to_use, script, callback_url, execution)
+
+            return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
+        except ConnectionError as e:
+            logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
+            retry_count += 1
+            time.sleep(5)
+        except:
+            traceback.print_exc()
+            execution.status = "FAILED"
+            execution.status_info = "Error while running the process"
+            execution.save()
+            return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
