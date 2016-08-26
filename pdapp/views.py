@@ -120,7 +120,9 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 def run_execution(request, pk):
     from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
-    from pdapp.core import get_clusters, deploy_cluster, run_process
+    from pdapp.core import get_clusters, deploy_cluster
+    # from pdapp.core import run_process
+    from pdapp.core import run_process_new as run_process
     import json
 
     try:
