@@ -123,6 +123,7 @@ def run_execution(request, pk):
     from pdapp.core import get_clusters, deploy_cluster
     # from pdapp.core import run_process
     from pdapp.core import run_process_new as run_process
+    from pdapp.core import create_temporary_user as create_temporary_user
     import json
 
     try:
@@ -187,10 +188,30 @@ def run_execution(request, pk):
         return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
 
     retry_count = 0
+    credentials = None
+    while retry_count < 10:
+        try:
+            logging.info("Creating a temporary a process on the cluster %s" % cluster_to_use)
+            credentials = create_temporary_user(cluster_to_use)
+        except ConnectionError as e:
+            logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
+            retry_count += 1
+            time.sleep(5)
+        except:
+            traceback.print_exc()
+            execution.status = "FAILED"
+            execution.status_info = "Error while creating the temporary user"
+            execution.save()
+            return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
+
+    if not credentials:
+        return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
+
+    retry_count = 0
     while retry_count < 10:
         try:
             logging.info("Running a process on the cluster %s" % cluster_to_use)
-            run_process(cluster_to_use, script, callback_url, execution)
+            run_process(cluster_to_use, script, callback_url, execution, credentials)
 
             return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
         except ConnectionError as e:
