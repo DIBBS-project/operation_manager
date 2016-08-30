@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Process manager agent API
+    Operation Manager Agent API
 
-    Provision Cloud Computing resources via API.
+    Interact with deployed Cloud Computing resources via API.
 
     OpenAPI spec version: 0.1.1
     
@@ -24,25 +24,14 @@
 
 from __future__ import absolute_import
 
-# import models into sdk package
-from .models.credentials import Credentials
-from .models.error import Error
-from .models.execution import Execution
-from .models.op import Op
-from .models.op_patch import OpPatch
-from .models.op_post import OpPost
-from .models.token_resp import TokenResp
-from .models.user import User
-from .models.user_patch import UserPatch
-from .models.user_post import UserPost
-
-# import apis into sdk package
-from .apis.ops_api import OpsApi
-from .apis.users_api import UsersApi
-
-# import ApiClient
-from .api_client import ApiClient
-
-from .configuration import Configuration
-
-configuration = Configuration()
+# import models into model package
+from .credentials import Credentials
+from .error import Error
+from .execution import Execution
+from .op import Op
+from .op_patch import OpPatch
+from .op_post import OpPost
+from .token_resp import TokenResp
+from .user import User
+from .user_patch import UserPatch
+from .user_post import UserPost

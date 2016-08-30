@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Process manager agent API
+    Operation Manager Agent API
 
-    Provision Cloud Computing resources via API.
+    Interact with deployed Cloud Computing resources via API.
 
     OpenAPI spec version: 0.1.1
     

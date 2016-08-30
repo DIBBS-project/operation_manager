@@ -228,9 +228,9 @@ def create_temporary_user(cluster, execution, resource_manager_url):
 
 def run_process_new(cluster, script, callback_url, execution, credentials):
 
-    from pma_client.apis import OpsApi, UsersApi
-    from pma_client.api_client import ApiClient
-    from pma_client.configure import configure_auth_basic
+    from oma_client.apis import OpsApi, UsersApi
+    from oma_client.api_client import ApiClient
+    from oma_client.configure import configure_auth_basic
 
     master_node_ip = cluster.master_node_ip if not isinstance(cluster, dict) else cluster["master_node_ip"]
 
