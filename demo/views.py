@@ -1,6 +1,6 @@
 from django.shortcuts import render
-import pdapp.models as models
-from pdapp.pr_client.apis import ProcessDefinitionsApi, ProcessImplementationsApi
+import omapp.models as models
+from omapp.pr_client.apis import ProcessDefinitionsApi, ProcessImplementationsApi
 
 from settings import Settings
 
@@ -13,9 +13,9 @@ def index(request):
     settings = Settings()
     urls = {
         'appliance_registry': re.sub('^https?://', '//', settings.appliance_registry_url),
-        'process_registry': re.sub('^https?://', '//', settings.operation_registry_url),
-        'process_dispatcher': re.sub('^https?://', '//', settings.operation_manager_url),
-        'resource_provisioner': re.sub('^https?://', '//', settings.resource_manager_url)
+        'operation_registry': re.sub('^https?://', '//', settings.operation_registry_url),
+        'operation_manager': re.sub('^https?://', '//', settings.operation_manager_url),
+        'resource_manager': re.sub('^https?://', '//', settings.resource_manager_url)
     }
     return render(request, "index.html", {'urls': urls})
 
@@ -78,7 +78,7 @@ def show_details(request, pk):
 
 
 def create_process_instance(request):
-    from pdapp.pr_client.apis.process_definitions_api import ProcessDefinitionsApi
+    from omapp.pr_client.apis.process_definitions_api import ProcessDefinitionsApi
     processdefs = ProcessDefinitionsApi().processdefs_get()
     return render(request, "process_instance_form.html", {"processdefs": processdefs})
 

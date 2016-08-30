@@ -1,6 +1,6 @@
 #! /bin/bash
 
-APP=pdapp
+APP=omapp
 
 echo "[RESET] Resetting the application..."
 rm -rf tmp
