@@ -1,11 +1,20 @@
 from django.shortcuts import render
 import omapp.models as models
-from omapp.pr_client.apis import ProcessDefinitionsApi, ProcessImplementationsApi
+from omapp.or_client.apis import ProcessDefinitionsApi, ProcessImplementationsApi
 
 from settings import Settings
 
 import re
 import json
+import base64
+
+
+def configure_basic_authentication(swagger_client, username, password):
+    authentication_string = "%s:%s" % (username, password)
+    base64_authentication_string = base64.b64encode(bytes(authentication_string))
+    header_key = "Authorization"
+    header_value = "Basic %s" % (base64_authentication_string, )
+    swagger_client.api_client.default_headers[header_key] = header_value
 
 
 # Index that provides a description of the API
@@ -22,11 +31,16 @@ def index(request):
 
 def process_instances(request):
 
+    # Configure a client for Operations
+    operations_client = ProcessDefinitionsApi()
+    operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    configure_basic_authentication(operations_client, "admin", "pass")
+
     tuples = []
 
     process_instances_list = models.ProcessInstance.objects.all()
     for process_instance in process_instances_list:
-        process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_instance.process_definition_id)
+        process_def = operations_client.processdefs_id_get(id=process_instance.process_definition_id)
         process_instance.expanded_parameters = []
         for key, val in json.loads(process_instance.parameters).items():
             process_instance.expanded_parameters = process_instance.expanded_parameters + [{"key": key,
@@ -47,12 +61,22 @@ def process_instances(request):
 def executions(request):
     executions_list = models.Execution.objects.all()
 
+    # Configure a client for OperationVersions
+    operation_versions_client = ProcessImplementationsApi()
+    operation_versions_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    configure_basic_authentication(operation_versions_client, "admin", "pass")
+
+    # Configure a client for OperationDefinitions
+    operations_client = ProcessDefinitionsApi()
+    operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    configure_basic_authentication(operations_client, "admin", "pass")
+
     tuples = []
     for execution in executions_list:
-        process_impl = ProcessImplementationsApi().processimpls_id_get(
+        process_impl = operation_versions_client.processimpls_id_get(
             id=execution.process_instance.process_definition_id
         )
-        process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
+        process_def = operations_client.processdefs_id_get(id=process_impl.process_definition)
         all_tuple = {
             "execution": execution,
             "process_def": process_def,
@@ -65,8 +89,19 @@ def executions(request):
 def show_details(request, pk):
 
     execution = models.Execution.objects.filter(id=pk)[0]
-    process_impl = ProcessImplementationsApi().processimpls_id_get(id=execution.process_instance.process_definition_id)
-    process_def = ProcessDefinitionsApi().processdefs_id_get(id=process_impl.process_definition)
+
+    # Configure a client for OperationVersions
+    operation_versions_client = ProcessImplementationsApi()
+    operation_versions_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    configure_basic_authentication(operation_versions_client, "admin", "pass")
+
+    # Configure a client for OperationDefinitions
+    operations_client = ProcessDefinitionsApi()
+    operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    configure_basic_authentication(operations_client, "admin", "pass")
+
+    process_impl = operation_versions_client.processimpls_id_get(id=execution.process_instance.process_definition_id)
+    process_def = operations_client.processdefs_id_get(id=process_impl.process_definition)
     all_tuple = {
         "execution": execution,
         "process_impl": process_impl,
@@ -78,8 +113,14 @@ def show_details(request, pk):
 
 
 def create_process_instance(request):
-    from omapp.pr_client.apis.process_definitions_api import ProcessDefinitionsApi
-    processdefs = ProcessDefinitionsApi().processdefs_get()
+    from omapp.or_client.apis.process_definitions_api import ProcessDefinitionsApi
+
+    # Configure a client for OperationDefinitions
+    operations_client = ProcessDefinitionsApi()
+    operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    configure_basic_authentication(operations_client, "admin", "pass")
+
+    processdefs = operations_client.processdefs_get()
     return render(request, "process_instance_form.html", {"processdefs": processdefs})
 
 

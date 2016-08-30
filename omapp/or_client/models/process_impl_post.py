@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Process Registry API
+    Operation Registry API
 
-    Register processes with the Process Registry API.
+    Register operations with the Operation Registry API.
 
     OpenAPI spec version: 0.1.9
     

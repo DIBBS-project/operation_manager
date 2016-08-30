@@ -4,7 +4,7 @@ from omapp.serializers import ExecutionSerializer, ProcessInstanceSerializer, Us
 from rest_framework import viewsets, permissions, status
 from django.views.decorators.csrf import csrf_exempt
 
-from omapp.pr_client.apis import ProcessImplementationsApi, ProcessDefinitionsApi
+from omapp.or_client.apis import ProcessImplementationsApi, ProcessDefinitionsApi
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -50,7 +50,7 @@ class ProcessInstanceViewSet(viewsets.ModelViewSet):
 
     # Override to set the user of the request using the credentials provided to perform the request.
     def create(self, request, *args, **kwargs):
-        from pr_client.apis import ProcessDefinitionsApi
+        from or_client.apis import ProcessDefinitionsApi
         import json
 
         data2 = {}

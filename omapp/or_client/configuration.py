@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    Process Registry API
+    Operation Registry API
 
-    Register processes with the Process Registry API.
+    Register operations with the Operation Registry API.
 
     OpenAPI spec version: 0.1.9
     
@@ -25,8 +25,6 @@
 from __future__ import absolute_import
 import base64
 import urllib3
-
-from settings import Settings
 
 try:
     import httplib
@@ -63,7 +61,7 @@ class Configuration(object):
         Constructor
         """
         # Default Base url
-        self.host = Settings().operation_registry_url
+        self.host = "http://127.0.0.1:8000"
         # Default api client
         self.api_client = None
         # Temp file folder for downloading files
@@ -227,7 +225,6 @@ class Configuration(object):
                     'key': 'Authorization',
                     'value': self.get_api_key_with_prefix('Authorization')
                 },
-
         }
 
     def to_debug_report(self):
