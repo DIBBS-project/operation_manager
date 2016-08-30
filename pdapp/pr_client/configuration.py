@@ -63,7 +63,7 @@ class Configuration(object):
         Constructor
         """
         # Default Base url
-        self.host = Settings().process_registry_url
+        self.host = Settings().operation_registry_url
         # Default api client
         self.api_client = None
         # Temp file folder for downloading files

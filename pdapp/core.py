@@ -18,13 +18,13 @@ def configure_basic_authentication(swagger_client, username, password):
     swagger_client.api_client.default_headers[header_key] = header_value
 
 
-def get_clusters(resource_provisioner_url):
-    r = requests.get('%s/clusters/' % resource_provisioner_url, headers={})
+def get_clusters(resource_manager_url):
+    r = requests.get('%s/clusters/' % resource_manager_url, headers={})
     response = json.loads(r.content)
     return response
 
 
-def deploy_cluster(execution, appliance, resource_provisioner_url):
+def deploy_cluster(execution, appliance, resource_manager_url):
     from rp_client.apis import ClusterDefinitionsApi
 
     execution.status = "DEPLOYING"
@@ -37,7 +37,7 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
                              "name": "MyHadoopCluster"}
 
     clusters_client = ClusterDefinitionsApi()
-    clusters_client.api_client.host = "%s" % (resource_provisioner_url,)
+    clusters_client.api_client.host = "%s" % (resource_manager_url,)
     configure_basic_authentication(clusters_client, "admin", "pass")
 
     response = clusters_client.clusters_post(data=cluster_creation_data)
@@ -49,7 +49,7 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
 
     logging.info("adding a new node (master) to the cluster %s" % (cluster_id,))
     node_addition_data = {"cluster_id": cluster_id}
-    r = requests.post('%s/hosts/' % resource_provisioner_url,
+    r = requests.post('%s/hosts/' % resource_manager_url,
                       data=json.dumps(node_addition_data))
 
     nb_nodes = 2
@@ -60,7 +60,7 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
         execution.save()
 
         logging.info("adding a new node (slave) to the cluster %s" % (cluster_id,))
-        r = requests.post('%s/hosts/' % resource_provisioner_url,
+        r = requests.post('%s/hosts/' % resource_manager_url,
                           data=json.dumps(node_addition_data))
 
     execution.status = "DEPLOYED"
@@ -199,7 +199,7 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
 #     return True
 
 
-def create_temporary_user(cluster, execution, resource_provisioner_url):
+def create_temporary_user(cluster, execution, resource_manager_url):
 
     from rp_client.apis import ClusterDefinitionsApi, CredentialsApi
 
@@ -215,7 +215,7 @@ def create_temporary_user(cluster, execution, resource_provisioner_url):
     execution.save()
 
     clusters_client = ClusterDefinitionsApi()
-    clusters_client.api_client.host = "%s" % (resource_provisioner_url,)
+    clusters_client.api_client.host = "%s" % (resource_manager_url,)
     configure_basic_authentication(clusters_client, "admin", "pass")
 
     result = clusters_client.clusters_id_new_account_post(cluster_id)

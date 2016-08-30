@@ -174,11 +174,11 @@ def run_execution(request, pk):
 
     try:
         # Call Mr Cluster
-        clusters = get_clusters(Settings().resource_provisioner_url)
+        clusters = get_clusters(Settings().resource_manager_url)
         cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters, force_new=execution.force_spawn_cluster!='')
         if cluster_to_use is None:
             logging.info("Creating a virtual cluster")
-            cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_provisioner_url)
+            cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_manager_url)
 
     except:
         traceback.print_exc()
@@ -192,7 +192,7 @@ def run_execution(request, pk):
     while not credentials and retry_count < 10:
         try:
             logging.info("Creating a temporary a process on the cluster %s" % cluster_to_use)
-            credentials = create_temporary_user(cluster_to_use, execution, Settings().resource_provisioner_url)
+            credentials = create_temporary_user(cluster_to_use, execution, Settings().resource_manager_url)
         except ConnectionError as e:
             logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
             retry_count += 1

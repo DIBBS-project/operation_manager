@@ -13,9 +13,9 @@ def index(request):
     settings = Settings()
     urls = {
         'appliance_registry': re.sub('^https?://', '//', settings.appliance_registry_url),
-        'process_registry': re.sub('^https?://', '//', settings.process_registry_url),
-        'process_dispatcher': re.sub('^https?://', '//', settings.process_dispatcher_url),
-        'resource_provisioner': re.sub('^https?://', '//', settings.resource_provisioner_url)
+        'process_registry': re.sub('^https?://', '//', settings.operation_registry_url),
+        'process_dispatcher': re.sub('^https?://', '//', settings.operation_manager_url),
+        'resource_provisioner': re.sub('^https?://', '//', settings.resource_manager_url)
     }
     return render(request, "index.html", {'urls': urls})
 
