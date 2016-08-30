@@ -189,10 +189,10 @@ def run_execution(request, pk):
 
     retry_count = 0
     credentials = None
-    while retry_count < 10:
+    while not credentials and retry_count < 10:
         try:
             logging.info("Creating a temporary a process on the cluster %s" % cluster_to_use)
-            credentials = create_temporary_user(cluster_to_use)
+            credentials = create_temporary_user(cluster_to_use, execution, Settings().resource_provisioner_url)
         except ConnectionError as e:
             logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
             retry_count += 1

@@ -26,9 +26,6 @@ def get_clusters(resource_provisioner_url):
 
 def deploy_cluster(execution, appliance, resource_provisioner_url):
     from rp_client.apis import ClusterDefinitionsApi
-    from rp_client.configure import configure_auth_basic
-
-    configure_auth_basic("admin", "pass")  # TODO: Change when the central authentication system is here
 
     execution.status = "DEPLOYING"
     execution.status_info = "Creating virtual cluster"
@@ -38,7 +35,12 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
     cluster_creation_data = {"user_id": "1",  # TODO: Remove (update the swagger client to >= 0.1.11 first)
                              "appliance": appliance,
                              "name": "MyHadoopCluster"}
-    response = ClusterDefinitionsApi().clusters_post(data=cluster_creation_data)
+
+    clusters_client = ClusterDefinitionsApi()
+    clusters_client.api_client.host = "%s" % (resource_provisioner_url,)
+    configure_basic_authentication(clusters_client, "admin", "pass")
+
+    response = clusters_client.clusters_post(data=cluster_creation_data)
     cluster_id = response.id
 
     # Add a master node to the cluster
@@ -197,9 +199,11 @@ def deploy_cluster(execution, appliance, resource_provisioner_url):
 #     return True
 
 
-def create_temporary_user(cluster, resource_provisioner_url):
+def create_temporary_user(cluster, execution, resource_provisioner_url):
 
     from rp_client.apis import ClusterDefinitionsApi, CredentialsApi
+
+    cluster_id = cluster.id if not isinstance(cluster, dict) else cluster["id"]
 
     execution.status = "PREPARING"
     execution.status_info = ""
@@ -214,16 +218,7 @@ def create_temporary_user(cluster, resource_provisioner_url):
     clusters_client.api_client.host = "%s" % (resource_provisioner_url,)
     configure_basic_authentication(clusters_client, "admin", "pass")
 
-    ops_data = {
-        "script": script,
-        "callback_url": callback_url
-    }
-
-    logging.info("creation the operation %s" % (ops_data,))
-    execution.status_info = "Creating the Operation"
-    execution.save()
-
-    result = clusters_client.clusters_id_new_account_post(cluster.id)
+    result = clusters_client.clusters_id_new_account_post(cluster_id)
 
     execution.status_info = "Temporary user created"
     execution.save()
@@ -267,8 +262,11 @@ def run_process_new(cluster, script, callback_url, execution, credentials):
 
     ops_client = OpsApi()
     ops_client.api_client.host = "http://%s:8011" % (master_node_ip,)
-    # configure_basic_authentication(ops_client, "admin", "pass")
-    configure_basic_authentication(ops_client, credentials["username"], credentials["password"])
+
+    username = credentials.username if not isinstance(credentials, dict) else credentials["username"]
+    password = credentials.password if not isinstance(credentials, dict) else credentials["password"]
+
+    configure_basic_authentication(ops_client, username, password)
 
     ops_data = {
         "script": script,
