@@ -1,13 +1,13 @@
 from rest_framework import serializers
-from models import ProcessInstance, Execution
+from models import Instance, Execution
 from django.contrib.auth.models import User
 
 
-class ProcessInstanceSerializer(serializers.ModelSerializer):
+class InstanceSerializer(serializers.ModelSerializer):
     executions = serializers.PrimaryKeyRelatedField(many=True, queryset=Execution.objects.all())
 
     class Meta:
-        model = ProcessInstance
+        model = Instance
         fields = ('id',
                   'author',
                   'name',
@@ -23,7 +23,7 @@ class ExecutionSerializer(serializers.ModelSerializer):
         model = Execution
         fields = ('id',
                   'author',
-                  'process_instance',
+                  'operation_instance',
                   'callback_url',
                   'force_spawn_cluster',
                   'creation_date',
@@ -35,8 +35,8 @@ class ExecutionSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     executions = serializers.PrimaryKeyRelatedField(many=True, queryset=Execution.objects.all())
-    process_instances = serializers.PrimaryKeyRelatedField(many=True, queryset=ProcessInstance.objects.all())
+    operation_instances = serializers.PrimaryKeyRelatedField(many=True, queryset=Instance.objects.all())
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'executions', 'process_instances')
+        fields = ('id', 'username', 'executions', 'operation_instances')

@@ -27,18 +27,18 @@ from __future__ import absolute_import
 # import models into sdk package
 from .models.credentials import Credentials
 from .models.error import Error
-from .models.process_def import ProcessDef
-from .models.process_def_patch import ProcessDefPatch
-from .models.process_def_post import ProcessDefPost
-from .models.process_impl import ProcessImpl
-from .models.process_impl_patch import ProcessImplPatch
-from .models.process_impl_post import ProcessImplPost
+from .models.operation_version import OperationVersion
+from .models.operation_version_patch import OperationVersionPatch
+from .models.operation_version_post import OperationVersionPost
+from .models.operations import Operations
+from .models.operations_patch import OperationsPatch
+from .models.operations_post import OperationsPost
 from .models.token_resp import TokenResp
 from .models.user import User
 
 # import apis into sdk package
-from .apis.process_definitions_api import ProcessDefinitionsApi
-from .apis.process_implementations_api import ProcessImplementationsApi
+from .apis.operation_versions_api import OperationVersionsApi
+from .apis.operations_api import OperationsApi
 from .apis.users_api import UsersApi
 
 # import ApiClient

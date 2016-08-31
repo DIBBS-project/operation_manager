@@ -11,8 +11,8 @@ from jsonfield import JSONField
 # Create your models here.
 
 
-class ProcessInstance(models.Model):
-    author = models.ForeignKey('auth.User', related_name='process_instances', on_delete=models.CASCADE)
+class Instance(models.Model):
+    author = models.ForeignKey('auth.User', related_name='operation_instances', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, blank=True, default='')
     process_definition_id = models.IntegerField()
     parameters = JSONField()
@@ -22,7 +22,7 @@ class ProcessInstance(models.Model):
 
 class Execution(models.Model):
     author = models.ForeignKey('auth.User', related_name='executions', on_delete=models.CASCADE)
-    process_instance = models.ForeignKey(ProcessInstance, related_name='executions', on_delete=models.CASCADE)
+    operation_instance = models.ForeignKey(Instance, related_name='executions', on_delete=models.CASCADE)
     callback_url = models.CharField(max_length=2048, blank=True, default='')
     force_spawn_cluster = models.CharField(max_length=8, blank=True, default='')
     creation_date = models.DateTimeField(auto_now_add=True)

@@ -5,7 +5,7 @@ import rest_framework.authtoken.views
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
-router.register(r'process_instances', views.ProcessInstanceViewSet)
+router.register(r'instances', views.InstanceViewSet)
 router.register(r'executions', views.ExecutionViewSet)
 router.register(r'users', views.UserViewSet)
 

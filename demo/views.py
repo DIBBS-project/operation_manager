@@ -1,6 +1,6 @@
 from django.shortcuts import render
 import omapp.models as models
-from omapp.or_client.apis import ProcessDefinitionsApi, ProcessImplementationsApi
+from omapp.or_client.apis import OperationsApi, OperationVersionsApi
 
 from settings import Settings
 
@@ -29,7 +29,7 @@ def index(request):
     return render(request, "index.html", {'urls': urls})
 
 
-def process_instances(request):
+def operation_instances(request):
 
     # Configure a client for Operations
     operations_client = ProcessDefinitionsApi()
@@ -38,24 +38,24 @@ def process_instances(request):
 
     tuples = []
 
-    process_instances_list = models.ProcessInstance.objects.all()
-    for process_instance in process_instances_list:
-        process_def = operations_client.processdefs_id_get(id=process_instance.process_definition_id)
-        process_instance.expanded_parameters = []
-        for key, val in json.loads(process_instance.parameters).items():
-            process_instance.expanded_parameters = process_instance.expanded_parameters + [{"key": key,
+    operation_instances_list = models.Instance.objects.all()
+    for operation_instance in operation_instances_list:
+        process_def = operations_client.processdefs_id_get(id=operation_instance.process_definition_id)
+        operation_instance.expanded_parameters = []
+        for key, val in json.loads(operation_instance.parameters).items():
+            operation_instance.expanded_parameters = operation_instance.expanded_parameters + [{"key": key,
                                                                                             "val": val}]
-        process_instance.expanded_files = []
-        for key, val in json.loads(process_instance.files).items():
-            process_instance.expanded_files = process_instance.expanded_files + [{"key": key,
+        operation_instance.expanded_files = []
+        for key, val in json.loads(operation_instance.files).items():
+            operation_instance.expanded_files = operation_instance.expanded_files + [{"key": key,
                                                                                   "val": val}]
         exec_tuple = {
-            "process_instance": process_instance,
+            "operation_instance": operation_instance,
             "process_definition": process_def,
         }
         tuples += [exec_tuple]
 
-    return render(request, "process_instances.html", {"tuples": tuples})
+    return render(request, "operation_instances.html", {"tuples": tuples})
 
 
 def executions(request):
@@ -74,7 +74,7 @@ def executions(request):
     tuples = []
     for execution in executions_list:
         process_impl = operation_versions_client.processimpls_id_get(
-            id=execution.process_instance.process_definition_id
+            id=execution.operation_instance.process_definition_id
         )
         process_def = operations_client.processdefs_id_get(id=process_impl.process_definition)
         all_tuple = {
@@ -100,7 +100,7 @@ def show_details(request, pk):
     operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
     configure_basic_authentication(operations_client, "admin", "pass")
 
-    process_impl = operation_versions_client.processimpls_id_get(id=execution.process_instance.process_definition_id)
+    process_impl = operation_versions_client.processimpls_id_get(id=execution.operation_instance.process_definition_id)
     process_def = operations_client.processdefs_id_get(id=process_impl.process_definition)
     all_tuple = {
         "execution": execution,
@@ -112,8 +112,8 @@ def show_details(request, pk):
     return render(request, "tuple.html", {"tuple": all_tuple})
 
 
-def create_process_instance(request):
-    from omapp.or_client.apis.process_definitions_api import ProcessDefinitionsApi
+def create_operation_instance(request):
+    from omapp.or_client.apis.operation_definitions_api import ProcessDefinitionsApi
 
     # Configure a client for OperationDefinitions
     operations_client = ProcessDefinitionsApi()
@@ -121,8 +121,8 @@ def create_process_instance(request):
     configure_basic_authentication(operations_client, "admin", "pass")
 
     processdefs = operations_client.processdefs_get()
-    return render(request, "process_instance_form.html", {"processdefs": processdefs})
+    return render(request, "operation_instance_form.html", {"processdefs": processdefs})
 
 
 def create_execution(request):
-    return render(request, "execution_form.html", {"instances": models.ProcessInstance.objects.all()})
+    return render(request, "execution_form.html", {"instances": models.Instance.objects.all()})

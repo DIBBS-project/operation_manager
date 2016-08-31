@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
-  title: Process Dispatcher API
-  description: Execute processes with the Process Dispatcher API.
-  version: "0.1.3"
+  title: Operation Manager API
+  description: Execute operations with the Operation Manager API.
+  version: "0.1.4"
 # the domain of the service
 host: 127.0.0.1:8001
 # array of all schemes that your API supports
@@ -23,20 +23,20 @@ securityDefinitions:
   basic:
     type: basic
 paths:
-  /process_instances/:
+  /instances/:
     get:
       summary: Get the list of all the process instances registered.
       description: |
         Get the list of all the process instances registered. No authentification is required.
       tags:
-        - Process Instances
+        - Instances
       responses:
         200:
           description: An array of process instances
           schema:
             type: array
             items:
-              $ref: '#/definitions/ProcessInstance'
+              $ref: '#/definitions/Instance'
         default:
           description: Unexpected error
           schema:
@@ -55,19 +55,19 @@ paths:
           description: Process instance
           required: true
           schema:
-            $ref: '#/definitions/ProcessInstancePost'
+            $ref: '#/definitions/InstancePost'
       tags:
-        - Process Instances
+        - Instances
       responses:
         201:
           description: The newly created process instance
           schema:
-            $ref: '#/definitions/ProcessInstance'
+            $ref: '#/definitions/Instance'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /process_instances/{id}/:
+  /instances/{id}/:
     get:
       summary: Get a single process instance.
       description: |
@@ -80,12 +80,12 @@ paths:
           type: integer
           minimum: 0
       tags:
-        - Process Instances
+        - Instances
       responses:
         200:
           description: The process instance matching the given ID
           schema:
-            $ref: '#/definitions/ProcessInstance'
+            $ref: '#/definitions/Instance'
         404:
           description: No process instance with the given ID
           schema:
@@ -114,14 +114,14 @@ paths:
           description: Process instance
           required: true
           schema:
-            $ref: '#/definitions/ProcessInstancePost'
+            $ref: '#/definitions/InstancePost'
       tags:
-        - Process Instances
+        - Instances
       responses:
         200:
           description: The updated process instance
           schema:
-            $ref: '#/definitions/ProcessInstance'
+            $ref: '#/definitions/Instance'
         404:
           description: No process instance with the given ID
           schema:
@@ -150,14 +150,14 @@ paths:
           description: Process instance
           required: true
           schema:
-            $ref: '#/definitions/ProcessInstancePatch'
+            $ref: '#/definitions/InstancePatch'
       tags:
-        - Process Instances
+        - Instances
       responses:
         200:
           description: The updated process instance
           schema:
-            $ref: '#/definitions/ProcessInstance'
+            $ref: '#/definitions/Instance'
         404:
           description: No process instance with the given ID
           schema:
@@ -181,7 +181,7 @@ paths:
         - basic: []
         - api_key: []
       tags:
-        - Process Instances
+        - Instances
       responses:
         204:
           description: Process instance correctly deleted
@@ -463,7 +463,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 definitions:
-  ProcessInstance:
+  Instance:
     type: object
     properties:
       id:
@@ -477,7 +477,7 @@ definitions:
         description: Name of the process instance, possibly empty
       process_definition_id:
         type: integer
-        description: Unique ID of the appliance on which an instance of the process must be run
+        description: Unique ID of the operation on which an instance of the operation must be run
       parameters:
         type: string
         description: JSON-formatted string containing a dictionary mapping a value for each parameter declared in the process definition
@@ -488,7 +488,7 @@ definitions:
         type: string
         format: date-time
         description: Date and time of creation of the process instance
-  ProcessInstancePost:
+  InstancePost:
     type: object
     required:
       - process_definition_id
@@ -500,14 +500,14 @@ definitions:
         description: Name of the process instance, possibly empty
       process_definition_id:
         type: integer
-        description: Unique ID of the appliance on which an instance of the process must be run
+        description: Unique ID of the operation on which an instance of the operation must be run
       parameters:
         type: string
         description: JSON-formatted string containing a dictionary mapping a value for each parameter declared in the process definition
       files:
         type: string
         description: JSON-formatted string containing a dictionary mapping each file declared in the process definition to a URL
-  ProcessInstancePatch:
+  InstancePatch:
     type: object
     properties:
       name:
@@ -515,7 +515,7 @@ definitions:
         description: Name of the process instance, possibly empty
       process_definition_id:
         type: integer
-        description: Unique ID of the appliance on which an instance of the process must be run
+        description: Unique ID of the operation on which an instance of the operation must be run
       parameters:
         type: string
         description: JSON-formatted string containing a dictionary mapping a value for each parameter declared in the process definition
@@ -531,7 +531,7 @@ definitions:
       author:
         type: integer
         description: Unique ID of the user who created the execution
-      process_instance:
+      operation_instance:
         type: integer
         description: Unique ID of the process instance this execution is of
       callback_url:
@@ -559,10 +559,10 @@ definitions:
   ExecutionPost:
     type: object
     required:
-      - process_instance
+      - operation_instance
       - resource_provisioner_token
     properties:
-      process_instance:
+      operation_instance:
         type: integer
         description: Unique ID of the process instance this execution is of
       callback_url:
@@ -577,7 +577,7 @@ definitions:
   ExecutionPatch:
     type: object
     properties:
-      process_instance:
+      operation_instance:
         type: integer
         description: Unique ID of the process instance this execution is of
       callback_url:
@@ -598,7 +598,7 @@ definitions:
       username:
         type: string
         description: Name given to the user.
-      process_definitions:
+      operation_definitions:
         type: array
         description: Array of IDs of all the process descriptions created by the user
         items:

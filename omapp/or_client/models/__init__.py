@@ -27,11 +27,11 @@ from __future__ import absolute_import
 # import models into model package
 from .credentials import Credentials
 from .error import Error
-from .process_def import ProcessDef
-from .process_def_patch import ProcessDefPatch
-from .process_def_post import ProcessDefPost
-from .process_impl import ProcessImpl
-from .process_impl_patch import ProcessImplPatch
-from .process_impl_post import ProcessImplPost
+from .operation_version import OperationVersion
+from .operation_version_patch import OperationVersionPatch
+from .operation_version_post import OperationVersionPost
+from .operations import Operations
+from .operations_patch import OperationsPatch
+from .operations_post import OperationsPost
 from .token_resp import TokenResp
 from .user import User

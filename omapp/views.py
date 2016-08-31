@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
-from omapp.models import Execution, ProcessInstance
-from omapp.serializers import ExecutionSerializer, ProcessInstanceSerializer, UserSerializer
+from omapp.models import Execution, Instance
+from omapp.serializers import ExecutionSerializer, InstanceSerializer, UserSerializer
 from rest_framework import viewsets, permissions, status
 from django.views.decorators.csrf import csrf_exempt
 
-from omapp.or_client.apis import ProcessImplementationsApi, ProcessDefinitionsApi
+from omapp.or_client.apis import OperationsApi, OperationVersionsApi
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -13,11 +13,19 @@ from sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 from requests.exceptions import ConnectionError
 
 from settings import Settings
-
+import base64
 import logging
 import traceback
 import time
 logging.basicConfig(level=logging.INFO)
+
+
+def configure_basic_authentication(swagger_client, username, password):
+    authentication_string = "%s:%s" % (username, password)
+    base64_authentication_string = base64.b64encode(bytes(authentication_string))
+    header_key = "Authorization"
+    header_value = "Basic %s" % (base64_authentication_string, )
+    swagger_client.api_client.default_headers[header_key] = header_value
 
 
 @api_view(['GET'])
@@ -36,13 +44,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
 
-class ProcessInstanceViewSet(viewsets.ModelViewSet):
+class InstanceViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list`, `create`, `retrieve`,
     `update` and `destroy` actions.
     """
-    queryset = ProcessInstance.objects.all()
-    serializer_class = ProcessInstanceSerializer
+    queryset = Instance.objects.all()
+    serializer_class = InstanceSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
@@ -50,7 +58,7 @@ class ProcessInstanceViewSet(viewsets.ModelViewSet):
 
     # Override to set the user of the request using the credentials provided to perform the request.
     def create(self, request, *args, **kwargs):
-        from or_client.apis import ProcessDefinitionsApi
+        from or_client.apis import OperationsApi
         import json
 
         data2 = {}
@@ -61,9 +69,15 @@ class ProcessInstanceViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=data2)
         serializer.is_valid(raise_exception=True)
 
+        # Create a client for Operations
+        operations_client = OperationsApi()
+        operations_client.api_client.host = "%s" % (Settings().operation_registry_url,)
+        configure_basic_authentication(operations_client, "admin", "pass")
+
         # Check that the process definition exists
         process_definition_id = data2[u'process_definition_id']
-        ProcessDefinitionsApi().processdefs_id_get(id=process_definition_id)
+
+        operations_client.operations_id_get(id=process_definition_id)
 
         # Check that the parameters are valid JSON
         if data2[u'parameters']:
@@ -137,30 +151,40 @@ def run_execution(request, pk):
         execution.status_info = "Checking parameters"
         execution.save()
 
+        # Create a client for Operations
+        operations_client = OperationsApi()
+        operations_client.api_client.host = "%s" % (Settings().operation_registry_url,)
+        configure_basic_authentication(operations_client, "admin", "pass")
+
+        # Create a client for OperationVersions
+        operation_versions_client = OperationVersionsApi()
+        operation_versions_client.api_client.host = "%s" % (Settings().operation_registry_url,)
+        configure_basic_authentication(operation_versions_client, "admin", "pass")
+
         # Check that the process definition exists
-        process_instance = execution.process_instance
-        process_definition = ProcessDefinitionsApi().processdefs_id_get(id=process_instance.process_definition_id)
+        operation_instance = execution.operation_instance
+        operation = operations_client.operations_id_get(id=operation_instance.process_definition_id)
 
         # FIXME: the chosen process implementation is always the first one
         # UPDATE: New architecture: No process implementation but process version, it will be fixed when changing this
-        process_impl_id = process_definition.implementations[0]
-        process_impl = ProcessImplementationsApi().processimpls_id_get(id=process_impl_id)
+        operation_version_id = operation.implementations[0]
+        operation_version = operation_versions_client.operationversions_id_get(id=operation_version_id)
 
-        if process_impl.output_parameters == "":
-            process_impl.output_parameters = {}
+        if operation_version.output_parameters == "":
+            operation_version.output_parameters = {}
         else:
-            process_impl.output_parameters = json.loads(process_impl.output_parameters)
+            operation_version.output_parameters = json.loads(operation_version.output_parameters)
 
         # Get all the required information
-        appliance = process_impl.appliance
-        parameters = json.loads(execution.process_instance.parameters)
-        files = json.loads(execution.process_instance.files)
+        appliance = operation_version.appliance
+        parameters = json.loads(execution.operation_instance.parameters)
+        files = json.loads(execution.operation_instance.files)
 
         filenames = fileneames_dictionary(files)
-        set_variables(process_impl, parameters)
-        set_files(process_impl, filenames)
+        set_variables(operation_version, parameters)
+        set_files(operation_version, filenames)
 
-        script = get_bash_script(process_impl, files, filenames)
+        script = get_bash_script(operation_version, files, filenames)
         print (script)
 
         callback_url = execution.callback_url
