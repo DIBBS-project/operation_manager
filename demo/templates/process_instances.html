@@ -50,19 +50,19 @@
         <tbody>
         {% for tuple in tuples %}
             <tr>
-                <td>{{ tuple.process_instance.id }}</td>
-                <td>{{ tuple.process_instance.name }}</td>
+                <td>{{ tuple.operation_instance.id }}</td>
+                <td>{{ tuple.operation_instance.name }}</td>
                 <td>#{{ tuple.process_definition.id }} - {{ tuple.process_definition.name }}</td>
                 <td>
                     <ul>
-                        {% for pair in tuple.process_instance.expanded_parameters %}
+                        {% for pair in tuple.operation_instance.expanded_parameters %}
                             <li>{{ pair.key }}: {{ pair.val }}</li>
                         {% endfor %}
                     </ul>
                 </td>
                 <td>
                     <ul>
-                        {% for pair in tuple.process_instance.expanded_files %}
+                        {% for pair in tuple.operation_instance.expanded_files %}
                             <li>{{ pair.key }}: {{ pair.val }}</li>
                         {% endfor %}
                     </ul>
