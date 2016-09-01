@@ -427,7 +427,7 @@ class ClusterDefinitionsApi(object):
 
         if 'id' in params and params['id'] < 0.0:
             raise ValueError("Invalid value for parameter `id` when calling `clusters_id_new_account_post`, must be a value greater than or equal to `0.0`")
-        resource_path = '/clusters/{id}/new_account'.replace('{format}', 'json')
+        resource_path = '/clusters/{id}/new_account/'.replace('{format}', 'json')
         path_params = {}
         if 'id' in params:
             path_params['id'] = params['id']

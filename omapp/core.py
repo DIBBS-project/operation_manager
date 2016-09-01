@@ -25,7 +25,7 @@ def get_clusters(resource_manager_url):
 
 
 def deploy_cluster(execution, appliance, resource_manager_url):
-    from rm_client.apis import ClusterDefinitionsApi
+    from rm_client.apis import ClusterDefinitionsApi, HostDefinitionsApi
 
     execution.status = "DEPLOYING"
     execution.status_info = "Creating virtual cluster"
@@ -48,9 +48,12 @@ def deploy_cluster(execution, appliance, resource_manager_url):
     execution.save()
 
     logging.info("adding a new node (master) to the cluster %s" % (cluster_id,))
+    hosts_client = HostDefinitionsApi()
+    hosts_client.api_client.host = "%s" % (resource_manager_url,)
+    configure_basic_authentication(hosts_client, "admin", "pass")
+
     node_addition_data = {"cluster_id": cluster_id}
-    r = requests.post('%s/hosts/' % resource_manager_url,
-                      data=json.dumps(node_addition_data))
+    hosts_client.hosts_post(data=node_addition_data)
 
     nb_nodes = 2
     for i in range(1, nb_nodes):
@@ -60,8 +63,7 @@ def deploy_cluster(execution, appliance, resource_manager_url):
         execution.save()
 
         logging.info("adding a new node (slave) to the cluster %s" % (cluster_id,))
-        r = requests.post('%s/hosts/' % resource_manager_url,
-                          data=json.dumps(node_addition_data))
+        hosts_client.hosts_post(data=node_addition_data)
 
     execution.status = "DEPLOYED"
     execution.status_info = ""
