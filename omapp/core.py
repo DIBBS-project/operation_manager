@@ -19,8 +19,16 @@ def configure_basic_authentication(swagger_client, username, password):
 
 
 def get_clusters(resource_manager_url):
-    r = requests.get('%s/clusters/' % resource_manager_url, headers={})
-    response = json.loads(r.content)
+    from rm_client.apis import ClusterDefinitionsApi, HostDefinitionsApi
+
+    clusters_client = ClusterDefinitionsApi()
+    clusters_client.api_client.host = "%s" % (resource_manager_url,)
+    configure_basic_authentication(clusters_client, "admin", "pass")
+
+    # r = requests.get('%s/clusters/' % resource_manager_url, headers={})
+    # response = json.loads(r.content)
+
+    response = clusters_client.clusters_get()
     return response
 
 
