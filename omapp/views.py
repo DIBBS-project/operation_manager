@@ -4,7 +4,7 @@ from omapp.serializers import ExecutionSerializer, InstanceSerializer, UserSeria
 from rest_framework import viewsets, permissions, status
 from django.views.decorators.csrf import csrf_exempt
 
-from omapp.or_client.apis import OperationsApi, OperationVersionsApi
+from common_dibbs.clients.or_client.apis import OperationsApi, OperationVersionsApi
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -17,15 +17,11 @@ import base64
 import logging
 import traceback
 import time
+from common_dibbs.misc import configure_basic_authentication
+from common_dibbs.clients.or_client.apis import OperationsApi
+import json
+
 logging.basicConfig(level=logging.INFO)
-
-
-def configure_basic_authentication(swagger_client, username, password):
-    authentication_string = "%s:%s" % (username, password)
-    base64_authentication_string = base64.b64encode(bytes(authentication_string))
-    header_key = "Authorization"
-    header_value = "Basic %s" % (base64_authentication_string, )
-    swagger_client.api_client.default_headers[header_key] = header_value
 
 
 @api_view(['GET'])
@@ -58,8 +54,6 @@ class InstanceViewSet(viewsets.ModelViewSet):
 
     # Override to set the user of the request using the credentials provided to perform the request.
     def create(self, request, *args, **kwargs):
-        from or_client.apis import OperationsApi
-        import json
 
         data2 = {}
         for key in request.data:

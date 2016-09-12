@@ -1,20 +1,12 @@
 from django.shortcuts import render
 import omapp.models as models
-from omapp.or_client.apis import OperationsApi, OperationVersionsApi
-
+from common_dibbs.clients.or_client.apis import OperationsApi, OperationVersionsApi
+from common_dibbs.clients.or_client.apis.operations_api import OperationsApi
 from settings import Settings
 
 import re
 import json
-import base64
-
-
-def configure_basic_authentication(swagger_client, username, password):
-    authentication_string = "%s:%s" % (username, password)
-    base64_authentication_string = base64.b64encode(bytes(authentication_string))
-    header_key = "Authorization"
-    header_value = "Basic %s" % (base64_authentication_string, )
-    swagger_client.api_client.default_headers[header_key] = header_value
+from common_dibbs.misc import configure_basic_authentication
 
 
 # Index that provides a description of the API
@@ -30,9 +22,8 @@ def index(request):
 
 
 def operation_instances(request):
-
     # Configure a client for Operations
-    operations_client = ProcessDefinitionsApi()
+    operations_client = OperationsApi()
     operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
     configure_basic_authentication(operations_client, "admin", "pass")
 
@@ -67,7 +58,7 @@ def executions(request):
     configure_basic_authentication(operation_versions_client, "admin", "pass")
 
     # Configure a client for OperationDefinitions
-    operations_client = ProcessDefinitionsApi()
+    operations_client = OperationsApi()
     operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
     configure_basic_authentication(operations_client, "admin", "pass")
 
@@ -87,7 +78,6 @@ def executions(request):
 
 
 def show_details(request, pk):
-
     execution = models.Execution.objects.filter(id=pk)[0]
 
     # Configure a client for OperationVersions
@@ -96,7 +86,7 @@ def show_details(request, pk):
     configure_basic_authentication(operation_versions_client, "admin", "pass")
 
     # Configure a client for OperationDefinitions
-    operations_client = ProcessDefinitionsApi()
+    operations_client = OperationsApi()
     operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
     configure_basic_authentication(operations_client, "admin", "pass")
 
@@ -113,10 +103,8 @@ def show_details(request, pk):
 
 
 def create_operation_instance(request):
-    from omapp.or_client.apis.operation_definitions_api import ProcessDefinitionsApi
-
     # Configure a client for OperationDefinitions
-    operations_client = ProcessDefinitionsApi()
+    operations_client = OperationsApi()
     operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
     configure_basic_authentication(operations_client, "admin", "pass")
 
