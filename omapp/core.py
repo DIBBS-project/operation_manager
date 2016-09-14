@@ -26,7 +26,7 @@ def get_clusters(resource_manager_url):
     return response
 
 
-def deploy_cluster(execution, appliance, resource_manager_url):
+def deploy_cluster(execution, appliance, resource_manager_url, hints=None):
 
     execution.status = "DEPLOYING"
     execution.status_info = "Creating virtual cluster"
@@ -37,11 +37,15 @@ def deploy_cluster(execution, appliance, resource_manager_url):
                              "appliance": appliance,
                              "name": "MyHadoopCluster"}
 
+    if hints is not None:
+        cluster_creation_data["hints"] = json.dumps(hints)
+
     # Create a client for ClusterDefinitions
     clusters_client = ClusterDefinitionsApi()
     clusters_client.api_client.host = "%s" % (resource_manager_url,)
     configure_basic_authentication(clusters_client, "admin", "pass")
 
+    # HINT INSERTION: Add a hint to this function to help to chose the right site
     response = clusters_client.clusters_post(data=cluster_creation_data)
     cluster_id = response.id
 

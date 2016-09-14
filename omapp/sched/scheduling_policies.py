@@ -9,13 +9,13 @@ def generic_getter(obj, property_name):
 
 class AbstractSchedulingPolicy(object):
 
-    def decide_cluster_deployment(self, appliances, sites, clusters):
+    def decide_cluster_deployment(self, appliances, sites, clusters, hints=None):
         raise not NotImplemented
 
 
 class DummySchedulingPolicy(AbstractSchedulingPolicy):
 
-    def decide_cluster_deployment(self, appliance, clusters, force_new=False):
+    def decide_cluster_deployment(self, appliance, clusters, force_new=False, hints=None):
         if force_new:
             return None
         for cluster in clusters:

@@ -19,6 +19,8 @@ import traceback
 import time
 from common_dibbs.misc import configure_basic_authentication
 from common_dibbs.clients.or_client.apis import OperationsApi
+from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
+from common_dibbs.clients.rm_client.apis import CredentialsApi
 import json
 
 logging.basicConfig(level=logging.INFO)
@@ -30,6 +32,39 @@ def api_root(request, format=None):
         'users': reverse('user-list', request=request, format=format),
         'executions': reverse('execution-list', request=request, format=format)
     })
+
+
+def filter_clusters_in_site(clusters, hints):
+    # Create a client for ApplianceImplementations
+    appliance_implementations_client = ApplianceImplementationsApi()
+    appliance_implementations_client.api_client.host = "%s" % (Settings().appliance_registry_url,)
+    configure_basic_authentication(appliance_implementations_client, "admin", "pass")
+
+    # Create a client for Credentials
+    credentials_client = CredentialsApi()
+    credentials_client.api_client.host = "%s" % (Settings().resource_manager_url,)
+    configure_basic_authentication(appliance_implementations_client, "admin", "pass")
+
+    all_credentials = credentials_client.credentials_get()
+
+    sites = []
+    credentials = hints["credentials"]
+    for credential in credentials:
+        matching_credentials = filter(lambda cred: cred.name == credential, all_credentials)
+        if len(matching_credentials) == 0:
+            continue
+        matching_credential = matching_credentials[0]
+        if matching_credential.site_name not in sites:
+            sites += [matching_credential.site_name]
+
+    results = []
+    for cluster in clusters:
+        if cluster.appliance_impl == "":
+            continue
+        appliance_impl = appliance_implementations_client.appliances_impl_name_get(cluster.appliance_impl)
+        if appliance_impl.site in sites or "*" in credentials:
+            results += [cluster]
+    return results
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -193,10 +228,15 @@ def run_execution(request, pk):
     try:
         # Call Mr Cluster
         clusters = get_clusters(Settings().resource_manager_url)
-        cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters, force_new=execution.force_spawn_cluster!='')
+        hints = None
+        if execution.hints != "{}":
+            hints = eval(execution.hints)
+            clusters = filter_clusters_in_site(clusters, hints)
+        # HINT INSERTION: Here we could use hints to select the right cluster
+        cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters, force_new=execution.force_spawn_cluster!='', hints=hints)
         if cluster_to_use is None:
             logging.info("Creating a virtual cluster")
-            cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_manager_url)
+            cluster_to_use = deploy_cluster(execution, appliance, Settings().resource_manager_url, hints=hints)
 
     except:
         traceback.print_exc()
