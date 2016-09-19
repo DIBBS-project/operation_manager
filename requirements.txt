@@ -1,7 +1,7 @@
 django>=1.8.0
 django-jsonfield
 djangorestframework
-common-dibbs==0.1.4
+common-dibbs
 
 certifi >= 14.05.14
 six == 1.8.0
