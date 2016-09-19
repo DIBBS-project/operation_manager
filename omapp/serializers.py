@@ -30,7 +30,8 @@ class ExecutionSerializer(serializers.ModelSerializer):
                   'status',
                   'status_info',
                   'resource_provisioner_token',
-                  'output_location')
+                  'output_location',
+                  'hints')
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -375,6 +375,12 @@ paths:
           required: true
           type: integer
           minimum: 0
+        - name: hints
+          in: query
+          description: Optional hints that will help to choose where to run the execution
+          required: false
+          type: integer
+          minimum: 0
       tags:
         - Executions
       responses:
@@ -556,6 +562,9 @@ definitions:
       output_location:
         type: string
         description: Location of the output file of the job on the machine, empty if not yet completed
+      hints:
+        type: string
+        description: Hints (JSON string) that helps to choose where to run the execution
   ExecutionPost:
     type: object
     required:

@@ -1,17 +1,25 @@
 
+def generic_getter(obj, property_name):
+    if hasattr(obj, property_name):
+        return getattr(obj, property_name)
+    if hasattr(obj, "__dict__"):
+        return obj.__dict__.get(property_name, None)
+    return None
+
+
 class AbstractSchedulingPolicy(object):
 
-    def decide_cluster_deployment(self, appliances, sites, clusters):
+    def decide_cluster_deployment(self, appliances, sites, clusters, hints=None):
         raise not NotImplemented
 
 
 class DummySchedulingPolicy(AbstractSchedulingPolicy):
 
-    def decide_cluster_deployment(self, appliance, clusters, force_new=False):
+    def decide_cluster_deployment(self, appliance, clusters, force_new=False, hints=None):
         if force_new:
             return None
         for cluster in clusters:
-            if str(cluster['appliance']) == str(appliance):
+            if str(generic_getter(cluster, "appliance")) == str(appliance):
                 return cluster
         # Return None to create a new cluster
         return None

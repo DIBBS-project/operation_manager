@@ -30,6 +30,7 @@ class Execution(models.Model):
     status_info = models.CharField(max_length=2048, blank=True, default='')
     resource_provisioner_token = models.CharField(max_length=128)
     output_location = models.CharField(max_length=2048, blank=True, default='')
+    hints = models.CharField(max_length=2048, blank=True, default='{}')
 
 
 # Add a token upon user creation
