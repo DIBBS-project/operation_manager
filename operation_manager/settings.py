@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'omapp',
     'demo',
+    'django_states',
+    'periodically',
 ]
 
 MIDDLEWARE_CLASSES = [

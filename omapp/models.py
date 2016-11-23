@@ -8,6 +8,9 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from jsonfield import JSONField
 
+from fsm.fsm import ExecutionStateMachine
+from django_states.models import StateModel
+from django_states.fields import StateField
 # Create your models here.
 
 
@@ -20,7 +23,9 @@ class Instance(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
 
 
-class Execution(models.Model):
+class Execution(StateModel):
+    operation_state = StateField(machine=ExecutionStateMachine, default='initiated')
+
     author = models.ForeignKey('auth.User', related_name='executions', on_delete=models.CASCADE)
     operation_instance = models.ForeignKey(Instance, related_name='executions', on_delete=models.CASCADE)
     callback_url = models.CharField(max_length=2048, blank=True, default='')
@@ -31,6 +36,7 @@ class Execution(models.Model):
     resource_provisioner_token = models.CharField(max_length=128)
     output_location = models.CharField(max_length=2048, blank=True, default='')
     hints = models.CharField(max_length=2048, blank=True, default='{}')
+    cluster_id = models.IntegerField(default=-1)
 
 
 # Add a token upon user creation
