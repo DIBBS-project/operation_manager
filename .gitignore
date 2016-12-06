@@ -4,6 +4,7 @@ tmp
 db.sqlite3
 pdapp/migrations
 omapp/migrations
+celeryd.pid
 
 # MAC OS
 
