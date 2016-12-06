@@ -73,9 +73,6 @@ def get_clusters(resource_manager_url):
 
 def deploy_cluster(execution, appliance, resource_manager_url, hints=None):
 
-    from periodictasks import create_periodic_check_thread
-    create_periodic_check_thread()
-
     execution.status = "DEPLOYING"
     execution.status_info = "Creating virtual cluster"
     execution.save()
@@ -159,33 +156,6 @@ def create_temporary_user(cluster, execution, resource_manager_url):
 def run_process(cluster, script, callback_url, execution, credentials):
     master_node_ip = cluster.master_node_ip if not isinstance(cluster, dict) else cluster["master_node_ip"]
 
-    execution.status = "PREPARING"
-    execution.status_info = ""
-    execution.save()
-
-    request_uuid = str(uuid.uuid4())
-
-    logging.info("launching script (request_uuid=%s)" % (request_uuid,))
-
-    execution.status_info = "Generating temporary folder"
-    execution.save()
-
-    def create_file(path, fdata):
-        # Delete file if it already exists
-        if os.path.exists(path):
-            os.remove(path)
-        englobing_folder = "/".join(path.split("/")[:-1])
-        if not os.path.exists(englobing_folder):
-            os.makedirs(englobing_folder)
-        # Write data in a new file
-        with open(path, "w+") as f:
-            f.write(fdata)
-        return True
-
-    execution.status_info = "Generating script.sh"
-    execution.save()
-
-    # Create a client for Operations
     ops_client = OpsApi()
     ops_client.api_client.host = "http://%s:8011" % (master_node_ip,)
 
@@ -193,6 +163,12 @@ def run_process(cluster, script, callback_url, execution, credentials):
     password = credentials.password if not isinstance(credentials, dict) else credentials["password"]
 
     configure_basic_authentication(ops_client, username, password)
+
+    request_uuid = str(uuid.uuid4())
+
+    logging.info("launching script (request_uuid=%s)" % (request_uuid,))
+
+    # Create a client for Operations
 
     ops_data = {
         "script": script,
@@ -212,6 +188,14 @@ def run_process(cluster, script, callback_url, execution, credentials):
         execution.status_info = "%s" % (msg, )
         execution.save()
         raise Exception(msg)
+    else:
+        credentials_dict = {
+            "username": username,
+            "password": password
+        }
+        credentials_json = json.dumps(credentials_dict)
+        execution.operation_manager_agent_credentials = credentials_json
+        execution.save()
 
     operation = result
 
@@ -222,43 +206,12 @@ def run_process(cluster, script, callback_url, execution, credentials):
 
     ops_client.ops_id_run_op_post(operation.id)
 
-    # # Run "test.sh" with bash
-    # logging.info("running script.sh")
-    # r = requests.get('%s/fs/run/script.sh/' % (REMOTE_HADOOP_WEBSERVICE_HOST), headers=headers)
-    # # curl --header "token: $TOKEN" -i -X GET  $REMOTE_HADOOP_WEBSERVICE_HOST/fs/run/test.sh/
-    # print (r)
-
-    # Download the "output.txt" file
-    execution.status = "COLLECTING"
-    execution.status_info = "Getting output file"
-    execution.save()
-
-    # logging.info("downloading the output")
-    # r = requests.get('%s/fs/download/output.txt/' % (REMOTE_HADOOP_WEBSERVICE_HOST), headers=headers)
-    # # curl --header "token: $TOKEN" -X GET $REMOTE_HADOOP_WEBSERVICE_HOST/fs/download/out.txt/
-    # print (r)
-    #
-    # # Sending the result to the callback url
-    # if callback_url:
-    #     logging.info("calling the callback (%s)" % callback_url)
-    #     execution.status_info = "Sending output to %s" % (callback_url)
-    #     execution.save()
-    #
-    #     r = requests.post(callback_url, data=r.content)
-    #     print (r)
-
-    # execution.output_location = '%s/fs/download/output.txt/?token=%s' % (REMOTE_HADOOP_WEBSERVICE_HOST, token)
-    execution.status = "FINISHED"
-    execution.status_info = ""
-    execution.save()
-
     return True
 
 
 def mark_deploying_handler(transition, execution, user):
     from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
     from omapp.core import get_clusters, deploy_cluster
-    # from omapp.core import run_process
     from omapp.core import run_process as run_process
     from omapp.core import create_temporary_user as create_temporary_user
     import json
@@ -334,7 +287,6 @@ def mark_ready_to_run_handler(transition, execution, user):
 def mark_running_handler(transition, execution, user):
     from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
     from omapp.core import get_clusters, deploy_cluster
-    # from omapp.core import run_process
     from omapp.core import run_process as run_process
     from omapp.core import create_temporary_user as create_temporary_user
     import json
@@ -373,12 +325,10 @@ def mark_running_handler(transition, execution, user):
         set_files(operation_version, filenames)
 
         script = get_bash_script(operation_version, files, filenames)
-        # print (script)
 
         callback_url = execution.callback_url
 
         clusters = get_clusters(Settings().resource_manager_url)
-        cluster_ids = map(lambda x: x.id, clusters)
         cluster_to_use = filter(lambda c: c.id == execution.cluster_id, clusters)[0]
 
         retry_count = 0
@@ -387,7 +337,14 @@ def mark_running_handler(transition, execution, user):
             try:
                 logging.info("Creating a temporary user on the cluster %s" % cluster_to_use)
                 credentials = create_temporary_user(cluster_to_use, execution, Settings().resource_manager_url)
-            except ConnectionError as e:
+                credentials_dict = {
+                    "username": credentials.username,
+                    "password": credentials.password
+                }
+                credentials_json = json.dumps(credentials_dict)
+                execution.resource_manager_agent_credentials = credentials_json
+                execution.save()
+            except ConnectionError:
                 logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
                 retry_count += 1
                 time.sleep(5)
@@ -427,12 +384,99 @@ def mark_running_handler(transition, execution, user):
 
 
 def mark_executed_handler(transition, execution, user):
-    pass
+
+    # Create a client for OperationVersions
+    operation_versions_client = OperationVersionsApi()
+    operation_versions_client.api_client.host = "%s" % (Settings().operation_registry_url,)
+    configure_basic_authentication(operation_versions_client, "admin", "pass")
+
+    # Create a client for ClusterDefinitions
+    clusters_client = ClusterDefinitionsApi()
+    clusters_client.api_client.host = "%s" % (Settings().resource_manager_url,)
+    configure_basic_authentication(clusters_client, "admin", "pass")
+
+    if execution.status == "FAILED":
+        return
+
+    # Download the "output.txt" file
+    execution.status = "COLLECTING"
+    execution.status_info = "Getting output file"
+    execution.save()
+
+    # Check that the process definition exists
+    operation_version = operation_versions_client.operationversions_id_get(id=execution.operation_instance_id)
+    output_file_path = None
+    output_file_name = None
+    if operation_version.output_type == "file":
+        cluster = clusters_client.clusters_id_get(execution.cluster_id)
+        logging.info("I will process the output of this execution by using these credentials %s" % (execution.operation_manager_agent_credentials))
+        output_parameters = json.loads(operation_version.output_parameters)
+        output_file_name = output_parameters.get("file_path", None)
+        if output_file_name is not None:
+            # Get a token to the remote cluster
+            operation_manager_agent_credentials = json.loads(execution.operation_manager_agent_credentials)
+            headers = {
+                "username": operation_manager_agent_credentials["username"],
+                "password": operation_manager_agent_credentials["password"]
+            }
+            r = requests.get('http://%s:8011/ops/%s/get_tmp_password/' % (cluster.master_node_ip, headers["username"]), headers=headers)
+            temporary_password = r.json()["tmp_password"]
+
+            # Generate a token to work with the deployed appliance
+            headers = {
+                "username": operation_manager_agent_credentials["username"],
+                "password": temporary_password
+            }
+            r = requests.get('http://%s:8000/generate_new_token/' % (cluster.master_node_ip), headers=headers)
+            print (r)
+            token = r.json()["token"]
+
+            # Downloads the output
+            headers = {
+                "token": token
+            }
+
+            download_url = 'http://%s:8000/fs/download/%s/' % (cluster.master_node_ip, output_file_name)
+            r = requests.get(download_url, headers=headers)
+            execution.output_location = "%s?token=%s" % (download_url, token)
+            execution.save()
+
+            # Write the downloaded file in a temporary file
+            output_file_path = "/tmp/%s" % (uuid.uuid4())
+            with open(output_file_path, 'wb') as fd:
+                for chunk in r.iter_content(chunk_size=128):
+                    fd.write(chunk)
+        else:
+            logging.error("Could not understand where is the output file (execution.id=%s)" % (execution.id))
+    else:
+        logging.error("Could not understand the output format(execution.id=%s): '%s'" % (execution.id, operation_version.output_type))
+
+    # Sending the result to the callback url
+    if execution.callback_url:
+        logging.info("calling the callback (%s)" % execution.callback_url)
+        execution.status_info = "Sending output to %s" % (execution.callback_url)
+        execution.save()
+
+        if output_file_path:
+            files = {'file': (output_file_name, open(output_file_path, 'rb'))}
+            r = requests.post(execution.callback_url, files=files)
+        else:
+            r = requests.post(execution.callback_url, data={"finished": True})
+        logging.info("made a request on %s (%s)" % (execution.callback_url, r))
+
+    return True
 
 
 def mark_finished_handler(transition, execution, user):
-    pass
+    execution.status = "FINISHED"
+    execution.status_info = ""
+    execution.save()
+
+    return True
 
 
 def mark_error_handler(transition, execution, user):
-    pass
+    execution.status = "ERROR"
+    execution.save()
+
+    return True

@@ -14,7 +14,3 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "operation_manager.settings")
 
 application = get_wsgi_application()
-
-# Create the process in charge of processing executions FSM
-from omapp.periodictasks import create_periodic_check_thread
-create_periodic_check_thread()

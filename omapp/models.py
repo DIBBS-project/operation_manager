@@ -37,6 +37,10 @@ class Execution(StateModel):
     output_location = models.CharField(max_length=2048, blank=True, default='')
     hints = models.CharField(max_length=2048, blank=True, default='{}')
     cluster_id = models.IntegerField(default=-1)
+    resource_manager_agent_credentials = models.CharField(max_length=2048, blank=True, default='{}')
+    operation_manager_agent_credentials = models.CharField(max_length=2048, blank=True, default='{}')
+
+    ongoing_transition = models.BooleanField(default=False)
 
 
 # Add a token upon user creation

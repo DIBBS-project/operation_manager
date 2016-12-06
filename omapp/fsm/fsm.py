@@ -78,7 +78,7 @@ class ExecutionStateMachine(StateMachine):
             mark_finished_handler(transition, instance, user)
 
     class mark_error(StateTransition):
-        from_states = ['initiated', 'deploying', 'ready_to_run', 'running', 'executed', 'finished']
+        from_states = ('initiated', 'deploying', 'ready_to_run', 'running', 'executed', 'finished')
         to_state = 'error'
         description = 'Put the execution of the operation in error state'
 
