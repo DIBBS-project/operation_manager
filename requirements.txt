@@ -13,4 +13,5 @@ django-states
 django-periodically
 librabbitmq
 celery
+redis
 celery[redis]
