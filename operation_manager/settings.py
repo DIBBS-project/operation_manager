@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -41,6 +43,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'omapp',
     'demo',
+    'django_states',
+    'periodically',
 ]
 
 MIDDLEWARE_CLASSES = [

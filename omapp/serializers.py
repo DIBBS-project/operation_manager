@@ -30,6 +30,8 @@ class ExecutionSerializer(serializers.ModelSerializer):
                   'status',
                   'status_info',
                   'resource_provisioner_token',
+                  'resource_manager_agent_credentials',
+                  'operation_manager_agent_credentials',
                   'output_location',
                   'hints')
 
