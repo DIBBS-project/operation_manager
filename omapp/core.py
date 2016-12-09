@@ -81,7 +81,8 @@ def deploy_cluster(execution, appliance, resource_manager_url, hints=None):
     cluster_creation_data = {"user_id": "1",  # TODO: Remove (update the swagger client to >= 0.1.11 first)
                              "appliance": appliance,
                              "name": "MyHadoopCluster",
-                             "targeted_slaves_count": 2}
+                             "targeted_slaves_count": 2
+                             }
 
     if hints is not None:
         cluster_creation_data["hints"] = json.dumps(hints)
@@ -95,7 +96,7 @@ def deploy_cluster(execution, appliance, resource_manager_url, hints=None):
     response = clusters_client.clusters_post(data=cluster_creation_data)
     cluster_id = response.id
 
-    hosts_client.hosts_post(data=node_addition_data)
+    # hosts_client.hosts_post(data=node_addition_data)
 
     execution.status = "DEPLOYED"
     execution.status_info = ""
@@ -116,9 +117,9 @@ def create_temporary_user(cluster, execution, resource_manager_url):
     execution.status_info = ""
     execution.save()
 
-    logging.info("creating a temporary user on cluster %s" % (cluster,))
+    logging.info("creating a temporary user on cluster %s" % (cluster.name,))
 
-    execution.status_info = "Creating a temporary user on cluster %s" % (cluster,)
+    execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
     execution.save()
 
     # Create a client for ClusterDefinitions
