@@ -77,11 +77,17 @@ def deploy_cluster(execution, appliance, resource_manager_url, hints=None):
     execution.status_info = "Creating virtual cluster"
     execution.save()
 
+    # Determine the number of slaves that the new cluster should contain
+    hints = json.loads(execution.hints)
+    targeted_slaves_count = 2
+    if "slave_nodes_count" in hints:
+        targeted_slaves_count = hints["slave_nodes_count"]
+
     logging.info("creating the logical cluster")
     cluster_creation_data = {"user_id": "1",  # TODO: Remove (update the swagger client to >= 0.1.11 first)
                              "appliance": appliance,
                              "name": "MyHadoopCluster",
-                             "targeted_slaves_count": 2
+                             "targeted_slaves_count": targeted_slaves_count
                              }
 
     if hints is not None:
