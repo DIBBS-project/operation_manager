@@ -285,7 +285,7 @@ def mark_bootstrapping_handler(transition, execution, user):
     cluster_to_use = filter(lambda c: c.id == execution.cluster_id, clusters)[0]
 
     retry_count = 0
-    max_retry = 30
+    max_retry = 100
     credentials = None
     while not credentials and retry_count < max_retry:
         try:
