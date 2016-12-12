@@ -299,7 +299,7 @@ def mark_bootstrapping_handler(transition, execution, user):
             execution.resource_manager_agent_credentials = credentials_json
             execution.save()
         except (ConnectionError, RmApiException):
-            execution.status_info = "The cluster is still bootstrapping... waiting for it to be ready (%s/%s)" % (retry_count, max_retry)
+            execution.status_info = "The cluster is still bootstrapping... waiting for it to be ready (attempt: %s/%s)" % (retry_count, max_retry)
             execution.save()
             logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
             retry_count += 1
