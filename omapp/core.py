@@ -232,13 +232,6 @@ def mark_deploying_handler(transition, execution, user):
         operation_version_id = operation.implementations[0]
         operation_version = operation_versions_client.operationversions_id_get(id=operation_version_id)
 
-        # # Prevent the operation manager to crash if the user provided an empty non JSON output
-        # # parameter
-        # if operation_version.output_parameters == "":
-        #     operation_version.output_parameters = {}
-        # else:
-        #     operation_version.output_parameters = json.loads(operation_version.output_parameters)
-
         # Get all the required information
         appliance = operation_version.appliance
     except:
