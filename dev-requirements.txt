@@ -1,0 +1,10 @@
+codecov
+coverage
+invoke
+nose
+pathlib
+pip>=9.0.1
+twine
+wheel
+
+-r requirements.txt
