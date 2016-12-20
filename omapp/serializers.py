@@ -33,7 +33,8 @@ class ExecutionSerializer(serializers.ModelSerializer):
                   'resource_manager_agent_credentials',
                   'operation_manager_agent_credentials',
                   'output_location',
-                  'hints')
+                  'hints',
+                  'operation_state')
 
 
 class UserSerializer(serializers.ModelSerializer):
