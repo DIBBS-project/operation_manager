@@ -1,0 +1,626 @@
+swagger: '2.0'
+info:
+  title: Process Dispatcher API
+  description: Execute processes with the Process Dispatcher API.
+  version: "0.1.2"
+# the domain of the service
+host: 127.0.0.1:8001
+# array of all schemes that your API supports
+schemes:
+# TODO: Change to HTTPS when not on localhost!
+  - http
+# will be prefixed to all paths
+# basePath: /pdapp
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: Authorization
+    in: header
+  basic:
+    type: basic
+paths:
+  /process_instances/:
+    get:
+      summary: Get the list of all the process instances registered.
+      description: |
+        Get the list of all the process instances registered. No authentification is required.
+      tags:
+        - Process Instances
+      responses:
+        200:
+          description: An array of process instances
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProcessInstance'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Register a new process instance.
+      description: |
+        Register a new process instance. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+
+      parameters:
+        - name: data
+          in: body
+          description: Process instance
+          required: true
+          schema:
+            $ref: '#/definitions/ProcessInstancePost'
+      tags:
+        - Process Instances
+      responses:
+        201:
+          description: The newly created process instance
+          schema:
+            $ref: '#/definitions/ProcessInstance'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /process_instances/{id}/:
+    get:
+      summary: Get a single process instance.
+      description: |
+        Get a single process instance. Authentification is required.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the process instance
+          required: true
+          type: integer
+          minimum: 0
+      tags:
+        - Process Instances
+      responses:
+        200:
+          description: The process instance matching the given ID
+          schema:
+            $ref: '#/definitions/ProcessInstance'
+        404:
+          description: No process instance with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary: Redefine an already existing process instance.
+      description: |
+        Redefine an already existing process instance. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+
+      parameters:
+        - name: id
+          in: path
+          description: ID of the process instance
+          required: true
+          type: integer
+          minimum: 0
+        - name: data
+          in: body
+          description: Process instance
+          required: true
+          schema:
+            $ref: '#/definitions/ProcessInstancePost'
+      tags:
+        - Process Instances
+      responses:
+        200:
+          description: The updated process instance
+          schema:
+            $ref: '#/definitions/ProcessInstance'
+        404:
+          description: No process instance with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Modify an already existing process instance.
+      description: |
+        Modify an already existing process instance. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+
+      parameters:
+        - name: id
+          in: path
+          description: ID of the process instance
+          required: true
+          type: integer
+          minimum: 0
+        - name: data
+          in: body
+          description: Process instance
+          required: true
+          schema:
+            $ref: '#/definitions/ProcessInstancePatch'
+      tags:
+        - Process Instances
+      responses:
+        200:
+          description: The updated process instance
+          schema:
+            $ref: '#/definitions/ProcessInstance'
+        404:
+          description: No process instance with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete an already existing process instance.
+      description: |
+        Delete an already existing process instance. Authentification is required.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the process instance
+          required: true
+          type: integer
+          minimum: 0
+      security:
+        - basic: []
+        - api_key: []
+      tags:
+        - Process Instances
+      responses:
+        204:
+          description: Process instance correctly deleted
+        404:
+          description: No process instance with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /executions/:
+    get:
+      summary: Get the list of all the executions registered.
+      description: |
+        Get the list of all the executions registered. No authentification is required.
+      tags:
+        - Executions
+      responses:
+        200:
+          description: An array of executions
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Execution'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Register a new execution.
+      description: |
+        Register a new execution. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+
+      parameters:
+        - name: data
+          in: body
+          description: Execution
+          required: true
+          schema:
+            $ref: '#/definitions/ExecutionPost'
+      tags:
+        - Executions
+      responses:
+        201:
+          description: The newly created execution
+          schema:
+            $ref: '#/definitions/Execution'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /executions/{id}/:
+    get:
+      summary: Get a single execution.
+      description: |
+        Get a single execution. Authentification is required.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the execution
+          required: true
+          type: integer
+          minimum: 0
+      tags:
+        - Executions
+      responses:
+        200:
+          description: The execution matching the given ID
+          schema:
+            $ref: '#/definitions/Execution'
+        404:
+          description: No execution with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary: Redefine an already existing execution.
+      description: |
+        Redefine an already existing execution. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+
+      parameters:
+        - name: id
+          in: path
+          description: ID of the execution
+          required: true
+          type: integer
+          minimum: 0
+        - name: data
+          in: body
+          description: Execution
+          required: true
+          schema:
+            $ref: '#/definitions/ExecutionPost'
+      tags:
+        - Executions
+      responses:
+        200:
+          description: The updated execution
+          schema:
+            $ref: '#/definitions/Execution'
+        404:
+          description: No execution with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Modify an already existing execution.
+      description: |
+        Modify an already existing execution. Authentification is required.
+      security:
+        - basic: []
+        - api_key: []
+
+      parameters:
+        - name: id
+          in: path
+          description: ID of the execution
+          required: true
+          type: integer
+          minimum: 0
+        - name: data
+          in: body
+          description: Execution
+          required: true
+          schema:
+            $ref: '#/definitions/ExecutionPatch'
+      tags:
+        - Executions
+      responses:
+        200:
+          description: The updated execution
+          schema:
+            $ref: '#/definitions/Execution'
+        404:
+          description: No execution with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete an already existing execution.
+      description: |
+        Delete an already existing execution. Authentification is required.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the execution
+          required: true
+          type: integer
+          minimum: 0
+      security:
+        - basic: []
+        - api_key: []
+      tags:
+        - Executions
+      responses:
+        204:
+          description: Execution correctly deleted
+        404:
+          description: No execution with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /exec/{id}/run/:
+    get:
+      summary: Run an already registered execution.
+      description: |
+        Run an already registered execution.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the execution
+          required: true
+          type: integer
+          minimum: 0
+      tags:
+        - Executions
+      responses:
+        202:
+          description: Execution successfully run
+          schema:
+            $ref: '#/definitions/Status'
+        404:
+          description: No execution with the given ID
+          schema:
+            $ref: '#/definitions/Status'
+        412:
+          description: Error while processing the process definition
+          schema:
+            $ref: '#/definitions/Status'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /users/:
+    get:
+      summary: Get the list of all the users.
+      description: |
+        Get the list of all the users. No authentification is required.
+      tags:
+        - Users
+      responses:
+        200:
+          description: An array of users
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /users/{id}/:
+    get:
+      summary: Get a single user.
+      description: |
+        Get a single user. No authentification is required.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the user
+          required: true
+          type: integer
+          minimum: 0
+      tags:
+        - Users
+      responses:
+        200:
+          description: The user matching the given ID
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: No user with the given ID
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api-token-auth/:
+    post:
+      summary: Get the authentification token for a user.
+      description: |
+        Get the authentification token for a user by providing his username and password. No authentification is required; however the credentials of the user are part of the request.
+      parameters:
+        - name: data
+          in: body
+          description: User credentials
+          required: true
+          schema:
+            $ref: '#/definitions/Credentials'
+      tags:
+        - Users
+      responses:
+        200:
+          description: The authentification token of the user
+          schema:
+            $ref: '#/definitions/TokenResp'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  ProcessInstance:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique identifier representing a specific process instance
+      author:
+        type: integer
+        description: Unique ID of the user who created the process instance
+      name:
+        type: string
+        description: Name of the process instance, possibly empty
+      process_definition_id:
+        type: integer
+        description: Unique ID of the appliance on which an instance of the process must be run
+      parameters:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping a value for each parameter declared in the process definition
+      files:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping each file declared in the process definition to a URL
+      creation_date:
+        type: string
+        format: date-time
+        description: Date and time of creation of the process instance
+  ProcessInstancePost:
+    type: object
+    required:
+      - process_definition_id
+      - parameters
+      - files
+    properties:
+      name:
+        type: string
+        description: Name of the process instance, possibly empty
+      process_definition_id:
+        type: integer
+        description: Unique ID of the appliance on which an instance of the process must be run
+      parameters:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping a value for each parameter declared in the process definition
+      files:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping each file declared in the process definition to a URL
+  ProcessInstancePatch:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Name of the process instance, possibly empty
+      process_definition_id:
+        type: integer
+        description: Unique ID of the appliance on which an instance of the process must be run
+      parameters:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping a value for each parameter declared in the process definition
+      files:
+        type: string
+        description: JSON-formatted string containing a dictionary mapping each file declared in the process definition to a URL
+  Execution:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique identifier representing a specific execution
+      author:
+        type: integer
+        description: Unique ID of the user who created the execution
+      process_instance:
+        type: integer
+        description: Unique ID of the process instance this execution is of
+      callback_url:
+        type: string
+        description: URL called after completion of the job (possibly empty)
+      creation_date:
+        type: string
+        format: date-time
+        description: Date and time of creation of the execution
+      status:
+        type: string
+        description: Status of the cluster
+      status_info:
+        type: string
+        description: More information about the status of the cluster
+      resource_provisioner_token:
+        type: string
+        description: Authentication token to be used to connect to the Resource Provisioner
+      output_location:
+        type: string
+        description: Location of the output file of the job on the machine, empty if not yet completed
+  ExecutionPost:
+    type: object
+    required:
+      - process_instance
+      - resource_provisioner_token
+    properties:
+      process_instance:
+        type: integer
+        description: Unique ID of the process instance this execution is of
+      callback_url:
+        type: string
+        description: URL called after completion of the job (possibly empty)
+      resource_provisioner_token:
+        type: string
+        description: Authentication token to be used to connect to the Resource Provisioner
+  ExecutionPatch:
+    type: object
+    properties:
+      process_instance:
+        type: integer
+        description: Unique ID of the process instance this execution is of
+      callback_url:
+        type: string
+        description: URL called after completion of the job (possibly empty)
+      resource_provisioner_token:
+        type: string
+        description: Authentication token to be used to connect to the Resource Provisioner
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique identifier representing a specific user
+      username:
+        type: string
+        description: Name given to the user.
+      process_definitions:
+        type: array
+        description: Array of IDs of all the process descriptions created by the user
+        items:
+          type: integer
+      definition:
+        type: string
+        description: JSON-formatted string containing all the information required to start the process
+  Error:
+    type: object
+    properties:
+      detail:
+        type: string
+  Status:
+    type: object
+    properties:
+      status:
+        type: string
+  TokenResp:
+    type: object
+    properties:
+      token:
+        type: string
+  Credentials:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        description: Username of the user
+        type: string
+      password:
+        description: Password of the user
+        type: string
