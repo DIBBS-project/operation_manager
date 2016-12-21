@@ -1,32 +1,33 @@
-import requests, os
+# coding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
+
 import json
-import uuid
 import logging
 import os
 import re
-import time
 import sys
 import thread
+import time
 import traceback
+import uuid
+
+import requests
+from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
+from common_dibbs.clients.oma_client.api_client import ApiClient
+from common_dibbs.clients.oma_client.apis import OpsApi, UsersApi
+from common_dibbs.clients.or_client.apis import (OperationsApi,
+                                                 OperationVersionsApi)
+from common_dibbs.clients.rm_client.apis import (ClusterDefinitionsApi,
+                                                 CredentialsApi,
+                                                 HostDefinitionsApi)
+from common_dibbs.clients.rm_client.rest import ApiException as RmApiException
 from common_dibbs.misc import configure_basic_authentication
 from requests.exceptions import ConnectionError
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
 
-from common_dibbs.clients.oma_client.apis import OpsApi, UsersApi
-from common_dibbs.clients.oma_client.api_client import ApiClient
-from common_dibbs.clients.rm_client.apis import ClusterDefinitionsApi, HostDefinitionsApi
-from common_dibbs.clients.rm_client.apis import ClusterDefinitionsApi, CredentialsApi
-from common_dibbs.clients.rm_client.apis import ClusterDefinitionsApi, HostDefinitionsApi
-from common_dibbs.clients.rm_client.rest import ApiException as RmApiException
-
+from .sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 from settings import Settings
-from common_dibbs.misc import configure_basic_authentication
-from common_dibbs.clients.or_client.apis import OperationsApi
-from common_dibbs.clients.or_client.apis import OperationsApi, OperationVersionsApi
-from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
-from common_dibbs.clients.rm_client.apis import CredentialsApi
-from sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 
 
 def filter_clusters_in_site(clusters, hints):

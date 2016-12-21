@@ -1,7 +1,10 @@
+# coding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
+
 import contextlib
 
-from django.test import TestCase, modify_settings
 from django.conf import settings
+from django.test import TestCase, modify_settings
 
 
 def disable_auth(test):

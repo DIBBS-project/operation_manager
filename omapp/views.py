@@ -1,27 +1,29 @@
-from django.contrib.auth.models import User
-from omapp.models import Execution, Instance
-from omapp.serializers import ExecutionSerializer, InstanceSerializer, UserSerializer
-from rest_framework import viewsets, permissions, status
-from django.views.decorators.csrf import csrf_exempt
+# coding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
 
-from common_dibbs.clients.or_client.apis import OperationsApi, OperationVersionsApi
+import base64
+import json
+import logging
+import time
+import traceback
+
+from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
+from common_dibbs.clients.or_client.apis import (OperationsApi,
+                                                 OperationVersionsApi)
+from common_dibbs.clients.rm_client.apis import CredentialsApi
+from common_dibbs.misc import configure_basic_authentication
+from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
+from requests.exceptions import ConnectionError
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-
-from requests.exceptions import ConnectionError
-
+from .models import Execution, Instance
+from .serializers import (ExecutionSerializer, InstanceSerializer,
+                               UserSerializer)
 from settings import Settings
-import base64
-import logging
-import traceback
-import time
-from common_dibbs.misc import configure_basic_authentication
-from common_dibbs.clients.or_client.apis import OperationsApi
-from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
-from common_dibbs.clients.rm_client.apis import CredentialsApi
-import json
 
 logging.basicConfig(level=logging.INFO)
 

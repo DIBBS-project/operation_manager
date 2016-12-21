@@ -1,9 +1,10 @@
-# Create your tasks here
-from __future__ import absolute_import, unicode_literals
-from celery import shared_task, group
+# coding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
+
+from celery import shared_task
 from celery.utils.log import get_task_logger
-from omapp.models import Execution
-import threading
+
+from .models import Execution
 
 logger = get_task_logger("operation_manager")
 
