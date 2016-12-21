@@ -14,7 +14,6 @@ matrix:
 
 before_install:
   - pip install --requirement dev-requirements.txt
-  - invoke build
 
 script:
   - invoke test --coverage
