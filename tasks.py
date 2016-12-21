@@ -16,19 +16,17 @@ def fileurl(path):
     return urllib.parse.urljoin('file:', urllib.request.pathname2url(path))
 
 
-@task
-def clean(ctx):
-    rm_targets = ['build', 'dist', '{}.egg-info'.format(PACKAGE_NAME)]
+# @task
+# def clean(ctx):
+#     rm_targets = ['build', 'dist', '{}.egg-info'.format(PACKAGE_NAME)]
 
 
 @task
-def test(ctx, coverage=False):
-    if coverage:
-        cmd = "coverage run manage.py test"
-    else:
-        cmd = 'python manage.py test'
+def test(ctx, coverage=False, verbose=False):
+    runner = "coverage run" if coverage else "python"
+    args = "manage.py test {}".format('--verbosity 2' if verbose else '')
 
-    ctx.run(cmd)
+    ctx.run('{} {}'.format(runner, args))
 
     if coverage:
         ctx.run('coverage xml')

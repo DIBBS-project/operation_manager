@@ -16,7 +16,7 @@ before_install:
   - pip install --requirement dev-requirements.txt
 
 script:
-  - invoke test --coverage
+  - invoke test --coverage --verbose
 
 after_success:
   - codecov
