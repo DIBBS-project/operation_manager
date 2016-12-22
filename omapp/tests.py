@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import contextlib
 import json
+import random
 try:
     from unittest import mock # py3.3+
 except ImportError:
@@ -16,9 +17,16 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory, APIClient
 
 import settings
-from . import models, tasks
+from . import clients, models, tasks
 
 SETTINGS = settings.Settings()
+
+
+class AttrDict(dict):
+    '''Because dictionaries are too good for Swagger clients'''
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 
 def disable_remote_auth(test):
@@ -30,6 +38,109 @@ def disable_remote_auth(test):
     return test
 
 
+def op_id_get(**kwargs):
+    '''https://dibbs-project.github.io/swagger-docs/or_api.html#!/Operations/get_operations_id'''
+    return AttrDict({
+        "id": kwargs.get('id', 0),
+        "name": "string",
+        "logo_url": "string",
+        "author": 0,
+        "description": "string",
+        "string_parameters": "string",
+        "file_parameters": "string",
+        "implementations": [0]
+    })
+
+
+def opv_id_get(**kwargs):
+    '''https://dibbs-project.github.io/swagger-docs/or_api.html#!/OperationVersions/get_operationversions_id'''
+    return AttrDict({
+        "id": kwargs.get('id', 0),
+        "name": "string",
+        "appliance": "string",
+        "process_definition": 0,
+        "cwd": "string",
+        "script": "string",
+        "output_type": "string",
+        "output_parameters": "string"
+    })
+
+
+def clusters_get():
+    return [
+      {
+        "id": 0,
+        "name": "string",
+        "uuid": "string",
+        "hints": "string",
+        "credential": "string",
+        "public_key": "string",
+        "status": "string",
+        "hosts_ids": [
+          "string"
+        ],
+        "targeted_slaves_count": 0,
+        "current_slaves_count": 0,
+        "hosts_ips": [
+          "string"
+        ],
+        "master_node_id": 0,
+        "master_node_ip": "string",
+        "user_id": 0,
+        "appliance": "string",
+        "appliance_impl": "string"
+      }
+    ]
+
+
+def clusters_post_factory(cid):
+    def clusters_post(**kwargs):
+        return AttrDict({
+            "id": cid,
+            "name": "string",
+            "uuid": "string",
+            "hints": "string",
+            "credential": "string",
+            "public_key": "string",
+            "status": "string",
+            "hosts_ids": ["string"],
+            "targeted_slaves_count": 0,
+            "current_slaves_count": 0,
+            "hosts_ips": ["string"],
+            "master_node_id": 0,
+            "master_node_ip": "string",
+            "user_id": 0,
+            "appliance": "string",
+            "appliance_impl": "string"
+        })
+    return clusters_post
+
+
+def cid_get(**kwargs):
+    return AttrDict({
+        "id": kwargs.get('id', 0),
+        "name": "string",
+        "uuid": "string",
+        "hints": "string",
+        "credential": "string",
+        "public_key": "string",
+        "status": "string",
+        "hosts_ids": [
+        "string"
+        ],
+        "targeted_slaves_count": 0,
+        "current_slaves_count": 0,
+        "hosts_ips": [
+        "string"
+        ],
+        "master_node_id": 0,
+        "master_node_ip": "string",
+        "user_id": 0,
+        "appliance": "string",
+        "appliance_impl": "string"
+    })
+
+
 class BasicTestCase(TestCase):
 
     @disable_remote_auth
@@ -37,6 +148,29 @@ class BasicTestCase(TestCase):
         """GET / : Sanity check; as basic as it gets."""
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
+
+
+class TestPatches(TestCase):
+    def test_clusters_id_get(self):
+        some_id = 1234
+        with mock.patch(
+            'omapp.clients.clusters.clusters_id_get',
+            new=cid_get
+        ):
+            ret_id = clients.clusters.clusters_id_get(id=some_id).id
+
+        self.assertEqual(some_id, ret_id)
+
+
+    def test_clusters_post(self):
+        some_id = 1234
+        with mock.patch(
+            'omapp.clients.clusters.clusters_id_get',
+            new=cid_get
+        ):
+            ret_id = clients.clusters.clusters_id_get(id=some_id).id
+
+        self.assertEqual(some_id, ret_id)
 
 
 class ExecutionsTestCase(TestCase):
@@ -61,8 +195,8 @@ class ExecutionsTestCase(TestCase):
             process_definition_id=42, #?
         )
 
-    def tearDown(self):
-        self.rfclient.logout()
+    # def tearDown(self):
+    #     self.rfclient.logout()
 
     @disable_remote_auth
     def test_api_creation(self):
@@ -90,35 +224,30 @@ class ExecutionsTestCase(TestCase):
                 CELERY_ALWAYS_EAGER=True,
                 CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                 CELERY_BROKER_URL='memory://',
-                BROKER_BACKEND='memory'):
+                BROKER_BACKEND='memory'), \
+                    mock.patch(
+                        'omapp.clients.operations.operations_id_get',
+                        new=op_id_get
+                    ), \
+                    mock.patch(
+                        'omapp.clients.operation_versions.operationversions_id_get',
+                        new=opv_id_get
+                    ), \
+                    mock.patch(
+                        'omapp.clients.clusters.clusters_get',
+                        new=clusters_get
+                    ), \
+                    mock.patch(
+                        'omapp.clients.clusters.clusters_post',
+                        new=clusters_post_factory(1234)
+                    ) as clusterpost, \
+                    mock.patch(
+                        'omapp.clients.clusters.clusters_id_get',
+                        new=cid_get
+                    ):
 
-            with requests_mock.Mocker() as m:
-                m.get(SETTINGS.operation_registry_url + '/operations/42/', json={})
-                # m.get('http://127.0.0.1:8000/operations/42/', json={})
-                m.get(SETTINGS.resource_manager_url + '/clusters/', json=[
-                  {
-                    "id": 0,
-                    "name": "string",
-                    "uuid": "string",
-                    "hints": "string",
-                    "credential": "string",
-                    "public_key": "string",
-                    "status": "string",
-                    "hosts_ids": [
-                      "string"
-                    ],
-                    "targeted_slaves_count": 0,
-                    "current_slaves_count": 0,
-                    "hosts_ips": [
-                      "string"
-                    ],
-                    "master_node_id": 0,
-                    "master_node_ip": "string",
-                    "user_id": 0,
-                    "appliance": "string",
-                    "appliance_impl": "string"
-                  }
-                ])
-                tasks.process_execution_state(execution.id)
+            tasks.process_execution_state(execution.id)
 
+            self.assertEqual(execution.cluster_id, 1234)
             self.assertEqual(execution.status, 'DEPLOYING')
+            # assert clusterpost.called

@@ -14,6 +14,7 @@ def check_operations_periodically():
     print("checking executions")
     executions = Execution.objects.filter(ongoing_transition=False).all()
     executions = filter(lambda x: x.operation_state not in ["error", "finished"], executions)
+    # exections = [e for e in executions if e.operation_state not in [...]]
     if len(executions) > 0:
         execution = executions[0]
         execution.ongoing_transition = True
