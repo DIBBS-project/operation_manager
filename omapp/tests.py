@@ -3,14 +3,23 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import contextlib
 import json
+try:
+    from unittest import mock # py3.3+
+except ImportError:
+    import mock # < 3.3
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase, modify_settings
+import requests_mock
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, APIClient
 
-from .models import Instance
+import settings
+from . import models, tasks
+
+SETTINGS = settings.Settings()
+
 
 def disable_remote_auth(test):
     test = modify_settings(MIDDLEWARE_CLASSES={
@@ -46,7 +55,7 @@ class ExecutionsTestCase(TestCase):
         self.rfclient.force_authenticate(user=self.user)
 
         # make some dummy instance
-        self.instance = Instance.objects.create(
+        self.instance = models.Instance.objects.create(
             author=self.user,
             name='test_instance',
             process_definition_id=42, #?
@@ -75,4 +84,41 @@ class ExecutionsTestCase(TestCase):
 
     # def test_state_transitions(self):
         # split this up later...
-        # data
+        execution = models.Execution.objects.get(id=data['id'])
+
+        with self.settings(
+                CELERY_ALWAYS_EAGER=True,
+                CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                CELERY_BROKER_URL='memory://',
+                BROKER_BACKEND='memory'):
+
+            with requests_mock.Mocker() as m:
+                m.get(SETTINGS.operation_registry_url + '/operations/42/', json={})
+                # m.get('http://127.0.0.1:8000/operations/42/', json={})
+                m.get(SETTINGS.resource_manager_url + '/clusters/', json=[
+                  {
+                    "id": 0,
+                    "name": "string",
+                    "uuid": "string",
+                    "hints": "string",
+                    "credential": "string",
+                    "public_key": "string",
+                    "status": "string",
+                    "hosts_ids": [
+                      "string"
+                    ],
+                    "targeted_slaves_count": 0,
+                    "current_slaves_count": 0,
+                    "hosts_ips": [
+                      "string"
+                    ],
+                    "master_node_id": 0,
+                    "master_node_ip": "string",
+                    "user_id": 0,
+                    "appliance": "string",
+                    "appliance_impl": "string"
+                  }
+                ])
+                tasks.process_execution_state(execution.id)
+
+            self.assertEqual(execution.status, 'DEPLOYING')

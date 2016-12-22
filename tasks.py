@@ -26,11 +26,12 @@ def test(ctx, coverage=False, verbose=False):
     runner = "coverage run" if coverage else "python"
     args = "manage.py test {}".format('--verbosity 2' if verbose else '')
 
-    ctx.run('{} {}'.format(runner, args))
+    ctx.run('{} {}'.format(runner, args), warn=True)
 
     if coverage:
         ctx.run('coverage xml')
         ctx.run('coverage html')
+        ctx.run('coverage report')
 
 
 @task

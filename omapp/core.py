@@ -26,6 +26,7 @@ from requests.exceptions import ConnectionError
 from rest_framework import status
 from rest_framework.response import Response
 
+from .process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
 from .sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 from settings import Settings
 
@@ -205,11 +206,6 @@ def run_process(cluster, script, callback_url, execution, credentials):
 
 
 def mark_deploying_handler(transition, execution, user):
-    from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
-    from omapp.core import get_clusters, deploy_cluster
-    from omapp.core import run_process as run_process
-    from omapp.core import create_temporary_user as create_temporary_user
-    import json
 
     try:
         execution.status = "INIT"
@@ -269,11 +265,6 @@ def mark_deploying_handler(transition, execution, user):
 
 
 def mark_bootstrapping_handler(transition, execution, user):
-    from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
-    from omapp.core import get_clusters, deploy_cluster
-    from omapp.core import run_process as run_process
-    from omapp.core import create_temporary_user as create_temporary_user
-    import json
 
     # Create a client for Operations
     operations_client = OperationsApi()
@@ -316,11 +307,6 @@ def mark_bootstrapping_handler(transition, execution, user):
 
 
 def mark_configuring_handler(transition, execution, user):
-    from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
-    from omapp.core import get_clusters, deploy_cluster
-    from omapp.core import run_process as run_process
-    from omapp.core import create_temporary_user as create_temporary_user
-    import json
 
     # Create a client for Operations
     operations_client = OperationsApi()
@@ -358,11 +344,6 @@ def mark_configuring_handler(transition, execution, user):
 
 
 def mark_executing_handler(transition, execution, user):
-    from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
-    from omapp.core import get_clusters, deploy_cluster
-    from omapp.core import run_process as run_process
-    from omapp.core import create_temporary_user as create_temporary_user
-    import json
 
     try:
         # Create a client for Operations
