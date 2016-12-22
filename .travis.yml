@@ -19,5 +19,6 @@ before_install:
 script:
   - invoke test --coverage --verbose
 
-after_success:
+# after_success:
+after_script: # hacky while trying to improve
   - codecov
