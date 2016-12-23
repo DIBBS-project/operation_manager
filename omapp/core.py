@@ -19,7 +19,6 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from . import clients
-from . import external
 from .process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
 from .sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 
