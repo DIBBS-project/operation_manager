@@ -132,10 +132,4 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @csrf_exempt
 def run_execution(request, pk):
-    from process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
-    from omapp.core import get_clusters, deploy_cluster
-    from omapp.core import run_process
-    from omapp.core import create_temporary_user as create_temporary_user
-    import json
-
     return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
