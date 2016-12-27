@@ -130,22 +130,28 @@ def create_temporary_user(cluster, execution, resource_manager_url):
     execution.status_info = ""
     execution.save()
 
-    logging.info("creating a temporary user on cluster %s" % (cluster.name,))
+    credentials = json.loads(execution.resource_manager_credentials)
+    if not credentials:
+        logging.info("creating a temporary user on cluster %s" % (cluster.name,))
 
-    execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
-    execution.save()
+        execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
+        execution.save()
 
     # Create a client for ClusterDefinitions
-    clusters_client = ClusterDefinitionsApi()
-    clusters_client.api_client.host = "%s" % (resource_manager_url,)
-    configure_basic_authentication(clusters_client, "admin", "pass")
+        clusters_client = ClusterDefinitionsApi()
+        clusters_client.api_client.host = "%s" % (resource_manager_url,)
+        configure_basic_authentication(clusters_client, "admin", "pass")
 
-    result = clusters_client.clusters_id_new_account_post(cluster_id)
+        credentials = clusters_client.clusters_id_new_account_post(cluster_id).to_dict()
+        execution.resource_manager_credentials = json.dumps(credentials)
 
-    execution.status_info = "Temporary user created"
-    execution.save()
+        execution.status_info = "Temporary user created"
+        execution.save()
+    else:
+        logging.info("reusing stored temporary user '{}' on cluster {}".format(
+            credentials['username'], cluster.name))
 
-    return result
+    return credentials
 
 
 def run_process(cluster, script, callback_url, execution, credentials):
@@ -289,11 +295,7 @@ def mark_bootstrapping_handler(transition, execution, user):
         try:
             logging.info("Creating a temporary user on the cluster %s" % cluster_to_use)
             credentials = create_temporary_user(cluster_to_use, execution, Settings().resource_manager_url)
-            credentials_dict = {
-                "username": credentials.username,
-                "password": credentials.password
-            }
-            credentials_json = json.dumps(credentials_dict)
+            credentials_json = json.dumps(credentials)
             execution.resource_manager_agent_credentials = credentials_json
             execution.save()
         except (ConnectionError, RmApiException):
