@@ -23,7 +23,7 @@ from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
 from common_dibbs.clients.rm_client.apis import CredentialsApi
 import json
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
