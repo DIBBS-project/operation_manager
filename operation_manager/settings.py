@@ -142,10 +142,19 @@ REST_FRAMEWORK = {
 # Logging configuration to display errors
 LOGGING = {
     'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s %(name)s.%(funcName)s(L%(lineno)s): %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'handlers': {
         'console':{
             'level':'DEBUG',
             'class':'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
@@ -153,6 +162,10 @@ LOGGING = {
             'handlers':['console'],
             'propagate': True,
             'level':'DEBUG',
+        },
+        'omapp': {
+            'handlers': ['console'],
+            'level': 'DEBUG'
         }
     },
 }

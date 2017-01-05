@@ -13,6 +13,8 @@ from omapp.core import (mark_bootstrapping_handler, mark_collecting_handler,
                         mark_error_handler, mark_executing_handler,
                         mark_finishing_handler)
 
+logger = logging.getLogger(__name__)
+
 
 class ExecutionStateMachine(StateMachine):
     log_transitions = True
@@ -50,7 +52,7 @@ class ExecutionStateMachine(StateMachine):
         description = 'Deploy the execution dependencies'
 
         def handler(transition, instance, user):
-            logging.info("INITIATED => DEPLOYING")
+            logger.info("INITIATED => DEPLOYING")
             mark_deploying_handler(transition, instance, user)
 
     class mark_bootstrapping(StateTransition):
@@ -59,7 +61,7 @@ class ExecutionStateMachine(StateMachine):
         description = 'Bootstrap the execution of the operation'
 
         def handler(transition, instance, user):
-            logging.info("DEPLOYING => BOOTSTRAPPED")
+            logger.info("DEPLOYING => BOOTSTRAPPED")
             mark_bootstrapping_handler(transition, instance, user)
 
     class mark_configuring(StateTransition):
@@ -68,7 +70,7 @@ class ExecutionStateMachine(StateMachine):
         description = 'Configure the execution of the operation'
 
         def handler(transition, instance, user):
-            logging.info("BOOTSTRAPPED => CONFIGURED")
+            logger.info("BOOTSTRAPPED => CONFIGURED")
             mark_configuring_handler(transition, instance, user)
 
     class mark_executing(StateTransition):
@@ -77,7 +79,7 @@ class ExecutionStateMachine(StateMachine):
         description = 'Execute the operation'
 
         def handler(transition, instance, user):
-            logging.info("CONFIGURED => EXECUTED")
+            logger.info("CONFIGURED => EXECUTED")
             mark_executing_handler(transition, instance, user)
 
     class mark_collecting(StateTransition):
@@ -86,7 +88,7 @@ class ExecutionStateMachine(StateMachine):
         description = 'Post execution'
 
         def handler(transition, instance, user):
-            logging.info("EXECUTED => COLLECTED")
+            logger.info("EXECUTED => COLLECTED")
             mark_collecting_handler(transition, instance, user)
 
     class mark_finishing(StateTransition):
@@ -95,7 +97,7 @@ class ExecutionStateMachine(StateMachine):
         description = 'Finished the execution of the operation'
 
         def handler(transition, instance, user):
-            logging.info("COLLECTED => FINISHED")
+            logger.info("COLLECTED => FINISHED")
             mark_finishing_handler(transition, instance, user)
 
     class mark_error(StateTransition):
@@ -105,5 +107,5 @@ class ExecutionStateMachine(StateMachine):
         description = 'Put the execution of the operation in error state'
 
         def handler(transition, instance, user):
-            logging.info("* => ERROR")
+            logger.info("* => ERROR")
             mark_error_handler(transition, instance, user)

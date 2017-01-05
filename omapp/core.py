@@ -30,6 +30,8 @@ from .sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 #
 #     return value
 
+logger = logging.getLogger(__name__)
+
 
 def filter_clusters_in_site(clusters, hints):
     all_credentials = clients.credentials.credentials_get()
@@ -70,7 +72,7 @@ def deploy_cluster(execution, appliance, hints=None):
     if "slave_nodes_count" in hints:
         targeted_slaves_count = hints["slave_nodes_count"]
 
-    logging.info("creating the logical cluster")
+    logger.info("creating the logical cluster")
     cluster_creation_data = {
         "user_id": "1",  # TODO: Remove (update the swagger client to >= 0.1.11 first)
         "appliance": appliance,
@@ -90,10 +92,10 @@ def deploy_cluster(execution, appliance, hints=None):
     execution.save()
 
     # Get the cluster description
-    logging.info("get a description of the cluster %s" % cluster_id)
+    logger.info("get a description of the cluster %s" % cluster_id)
     description = clients.clusters.clusters_id_get(id=cluster_id)
 
-    logging.info("description will be returned %s" % description)
+    logger.info("description will be returned %s" % description)
     return description
 
 
@@ -104,7 +106,7 @@ def create_temporary_user(cluster, execution):
     execution.status_info = ""
     execution.save()
 
-    logging.info("creating a temporary user on cluster %s" % (cluster.name,))
+    logger.info("creating a temporary user on cluster %s" % (cluster.name,))
 
     execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
     execution.save()
@@ -137,7 +139,7 @@ def run_process(cluster, script, callback_url, execution, credentials):
         "callback_url": callback_url
     }
 
-    logging.info("creation the operation %s" % (ops_data,))
+    logger.info("creation the operation %s" % (ops_data,))
     execution.status_info = "Creating the Operation"
     execution.save()
 
@@ -146,7 +148,7 @@ def run_process(cluster, script, callback_url, execution, credentials):
     # Save information about the operation's execution in database. Detect if an issue happened.
     if not hasattr(result, "id"):
         msg = "Could not create operation (%s) on the master node (%s)" % (ops_data, master_node_ip)
-        logging.error("%s, aborting..." % (msg, master_node_ip))
+        logger.error("%s, aborting..." % (msg, master_node_ip))
         execution.status = "ERROR"
         execution.status_info = "%s" % (msg, )
         execution.save()
@@ -163,7 +165,7 @@ def run_process(cluster, script, callback_url, execution, credentials):
 
     operation = result
 
-    logging.info("running the operation %s" % (ops_data,))
+    logger.info("running the operation %s" % (ops_data,))
     execution.status = "RUNNING"
     execution.status_info = "Executing the operation (%s on %s)" % (operation.id, master_node_ip)
     execution.save()
@@ -205,7 +207,7 @@ def mark_deploying_handler(transition, execution, user):
         # HINT INSERTION: Here we could use hints to select the right cluster
         cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters, force_new=execution.force_spawn_cluster!='', hints=hints)
         if cluster_to_use is None:
-            logging.info("Creating a virtual cluster")
+            logger.info("Creating a virtual cluster")
             cluster_to_use = deploy_cluster(execution, appliance, hints=hints)
             print("cluster_to_user: %s" % (cluster_to_use))
             execution.cluster_id = cluster_to_use.id
@@ -229,7 +231,7 @@ def mark_bootstrapping_handler(transition, execution, user):
     credentials = None
     while not credentials and retry_count < max_retry:
         try:
-            logging.info("Creating a temporary user on the cluster %s" % cluster_to_use)
+            logger.info("Creating a temporary user on the cluster %s" % cluster_to_use)
             credentials = create_temporary_user(cluster_to_use, execution)
             credentials_json = json.dumps(credentials)
             execution.resource_manager_agent_credentials = credentials_json
@@ -237,7 +239,7 @@ def mark_bootstrapping_handler(transition, execution, user):
         except (ConnectionError, RmApiException):
             execution.status_info = "The cluster is still bootstrapping... waiting for it to be ready (attempt: %s/%s)" % (retry_count, max_retry)
             execution.save()
-            logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
+            logger.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
             retry_count += 1
             time.sleep(5)
         except:
@@ -318,12 +320,12 @@ def mark_executing_handler(transition, execution, user):
         retry_count = 0
         while retry_count < 10:
             try:
-                logging.info("Running a process on the cluster %s" % cluster_to_use)
+                logger.info("Running a process on the cluster %s" % cluster_to_use)
                 run_process(cluster_to_use, script, callback_url, execution, credentials)
 
                 return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
             except ConnectionError as e:
-                logging.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
+                logger.info("The deployed ressources seems to not be ready yet, I'm giving more time (5 seconds) to start!")
                 retry_count += 1
                 time.sleep(5)
             except:
@@ -334,7 +336,7 @@ def mark_executing_handler(transition, execution, user):
                 return Response({"status": "failed"}, status=status.HTTP_412_PRECONDITION_FAILED)
     except:
         traceback.print_exc()
-        logging.error("Could not launch the execution")
+        logger.error("Could not launch the execution")
         pass
     pass
 
@@ -354,7 +356,7 @@ def mark_collecting_handler(transition, execution, user):
     output_file_name = None
     if operation_version.output_type == "file":
         cluster = clients.clusters.clusters_id_get(execution.cluster_id)
-        logging.info("I will process the output of this execution by using these credentials %s" % (execution.operation_manager_agent_credentials))
+        logger.info("I will process the output of this execution by using these credentials %s" % (execution.operation_manager_agent_credentials))
         output_parameters = json.loads(operation_version.output_parameters)
         output_file_name = output_parameters.get("file_path", None)
         if output_file_name is not None:
@@ -392,13 +394,13 @@ def mark_collecting_handler(transition, execution, user):
                 for chunk in r.iter_content(chunk_size=128):
                     fd.write(chunk)
         else:
-            logging.error("Could not understand where is the output file (execution.id=%s)" % (execution.id))
+            logger.error("Could not understand where is the output file (execution.id=%s)" % (execution.id))
     else:
-        logging.error("Could not understand the output format(execution.id=%s): '%s'" % (execution.id, operation_version.output_type))
+        logger.error("Could not understand the output format(execution.id=%s): '%s'" % (execution.id, operation_version.output_type))
 
     # Sending the result to the callback url
     if execution.callback_url:
-        logging.info("calling the callback (%s)" % execution.callback_url)
+        logger.info("calling the callback (%s)" % execution.callback_url)
         execution.status_info = "Sending output to %s" % (execution.callback_url)
         execution.save()
 
@@ -407,7 +409,7 @@ def mark_collecting_handler(transition, execution, user):
             r = requests.post(execution.callback_url, files=files)
         else:
             r = requests.post(execution.callback_url, data={"finished": True})
-        logging.info("made a request on %s (%s)" % (execution.callback_url, r))
+        logger.info("made a request on %s (%s)" % (execution.callback_url, r))
 
     return True
 
