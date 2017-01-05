@@ -40,23 +40,29 @@ def filter_clusters_in_site(clusters, hints):
     credentials_client.api_client.host = "%s" % (Settings().resource_manager_url,)
     configure_basic_authentication(appliance_implementations_client, "admin", "pass")
 
+    # Get all credentials
     all_credentials = credentials_client.credentials_get()
 
+    # Find the sites that can be used by the used (i.e. sites where user has credentials)
     sites = []
     credentials = hints["credentials"]
     for credential in credentials:
+        # Filter credentials that corresponds to the name provided in the hints
         matching_credentials = filter(lambda cred: cred.name == credential, all_credentials)
         if len(matching_credentials) == 0:
             continue
+        # Use the first credential that has been found
         matching_credential = matching_credentials[0]
         if matching_credential.site_name not in sites:
             sites += [matching_credential.site_name]
 
+    # Find clusters that are in sites that the user can use
     results = []
     for cluster in clusters:
         if cluster.appliance_impl == "":
             continue
         appliance_impl = appliance_implementations_client.appliances_impl_name_get(cluster.appliance_impl)
+        # Detect the site of the cluster (Site <--> ApplianceImpl <--> Cluster)
         if appliance_impl.site in sites or "*" in credentials:
             results += [cluster]
     return results
@@ -124,27 +130,34 @@ def create_temporary_user(cluster, execution, resource_manager_url):
     execution.status_info = ""
     execution.save()
 
-    logging.info("creating a temporary user on cluster %s" % (cluster.name,))
+    credentials = json.loads(execution.resource_manager_credentials)
+    if not credentials:
+        logging.info("creating a temporary user on cluster %s" % (cluster.name,))
 
-    execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
-    execution.save()
+        execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
+        execution.save()
 
     # Create a client for ClusterDefinitions
-    clusters_client = ClusterDefinitionsApi()
-    clusters_client.api_client.host = "%s" % (resource_manager_url,)
-    configure_basic_authentication(clusters_client, "admin", "pass")
+        clusters_client = ClusterDefinitionsApi()
+        clusters_client.api_client.host = "%s" % (resource_manager_url,)
+        configure_basic_authentication(clusters_client, "admin", "pass")
 
-    result = clusters_client.clusters_id_new_account_post(cluster_id)
+        credentials = clusters_client.clusters_id_new_account_post(cluster_id).to_dict()
+        execution.resource_manager_credentials = json.dumps(credentials)
 
-    execution.status_info = "Temporary user created"
-    execution.save()
+        execution.status_info = "Temporary user created"
+        execution.save()
+    else:
+        logging.info("reusing stored temporary user '{}' on cluster {}".format(
+            credentials['username'], cluster.name))
 
-    return result
+    return credentials
 
 
 def run_process(cluster, script, callback_url, execution, credentials):
     master_node_ip = cluster.master_node_ip if not isinstance(cluster, dict) else cluster["master_node_ip"]
 
+    # Create a client for Operations
     ops_client = OpsApi()
     ops_client.api_client.host = "http://%s:8011" % (master_node_ip,)
 
@@ -153,12 +166,8 @@ def run_process(cluster, script, callback_url, execution, credentials):
 
     configure_basic_authentication(ops_client, username, password)
 
-    request_uuid = str(uuid.uuid4())
-
-    logging.info("launching script (request_uuid=%s)" % (request_uuid,))
-
-    # Create a client for Operations
-
+    # Create an operation, and post it to the Operation Manager Agent running on port 8011 on the
+    # master node
     ops_data = {
         "script": script,
         "callback_url": callback_url
@@ -170,6 +179,7 @@ def run_process(cluster, script, callback_url, execution, credentials):
 
     result = ops_client.ops_post(data=ops_data)
 
+    # Save information about the operation's execution in database. Detect if an issue happened.
     if not hasattr(result, "id"):
         msg = "Could not create operation (%s) on the master node (%s)" % (ops_data, master_node_ip)
         logging.error("%s, aborting..." % (msg, master_node_ip))
@@ -178,6 +188,7 @@ def run_process(cluster, script, callback_url, execution, credentials):
         execution.save()
         raise Exception(msg)
     else:
+        # Save temporary credentials information in the operation
         credentials_dict = {
             "username": username,
             "password": password
@@ -224,15 +235,8 @@ def mark_deploying_handler(transition, execution, user):
         operation_instance = execution.operation_instance
         operation = operations_client.operations_id_get(id=operation_instance.process_definition_id)
 
-        # FIXME: the chosen process implementation is always the first one
-        # UPDATE: New architecture: No process implementation but process version, it will be fixed when changing this
         operation_version_id = operation.implementations[0]
         operation_version = operation_versions_client.operationversions_id_get(id=operation_version_id)
-
-        if operation_version.output_parameters == "":
-            operation_version.output_parameters = {}
-        else:
-            operation_version.output_parameters = json.loads(operation_version.output_parameters)
 
         # Get all the required information
         appliance = operation_version.appliance
@@ -291,11 +295,7 @@ def mark_bootstrapping_handler(transition, execution, user):
         try:
             logging.info("Creating a temporary user on the cluster %s" % cluster_to_use)
             credentials = create_temporary_user(cluster_to_use, execution, Settings().resource_manager_url)
-            credentials_dict = {
-                "username": credentials.username,
-                "password": credentials.password
-            }
-            credentials_json = json.dumps(credentials_dict)
+            credentials_json = json.dumps(credentials)
             execution.resource_manager_agent_credentials = credentials_json
             execution.save()
         except (ConnectionError, RmApiException):
@@ -342,6 +342,8 @@ def mark_configuring_handler(transition, execution, user):
     operation_version_id = operation.implementations[0]
     operation_version = operation_versions_client.operationversions_id_get(id=operation_version_id)
 
+    # Prevent the operation manager to crash if the user provided an empty non JSON output
+    # parameter
     if operation_version.output_parameters == "":
         operation_version.output_parameters = {}
     else:
@@ -354,10 +356,6 @@ def mark_configuring_handler(transition, execution, user):
     filenames = fileneames_dictionary(files)
     set_variables(operation_version, parameters)
     set_files(operation_version, filenames)
-
-    script = get_bash_script(operation_version, files, filenames)
-
-    callback_url = execution.callback_url
 
 
 def mark_executing_handler(transition, execution, user):
@@ -401,7 +399,6 @@ def mark_executing_handler(transition, execution, user):
         set_files(operation_version, filenames)
 
         script = get_bash_script(operation_version, files, filenames)
-        #
         callback_url = execution.callback_url
 
         clusters = get_clusters(Settings().resource_manager_url)
