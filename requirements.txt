@@ -1,17 +1,13 @@
-django>=1.8.0
-django-jsonfield
-djangorestframework
-common-dibbs
-
-certifi >= 14.05.14
-six == 1.8.0
-python_dateutil >= 2.5.3
-setuptools >= 21.0.0
-urllib3 >= 1.15.1
-
-django-states
-django-periodically
-librabbitmq
-celery
-redis
 celery[redis]
+certifi>=14.05.14
+common-dibbs
+django>=1.8,<1.9
+django-jsonfield
+django-periodically
+django-states
+djangorestframework>=3.5,<3.6
+python_dateutil>=2.5.3
+redis
+setuptools>=21.0.0
+six>=1.8.0
+urllib3>=1.15.1

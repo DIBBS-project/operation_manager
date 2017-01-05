@@ -1,14 +1,17 @@
-from django_states.fields import StateField
-from django_states.machine import StateMachine, StateDefinition, StateTransition
-from django_states.models import StateModel
-from omapp.core import mark_deploying_handler
-from omapp.core import mark_bootstrapping_handler
-from omapp.core import mark_configuring_handler
-from omapp.core import mark_executing_handler
-from omapp.core import mark_collecting_handler
-from omapp.core import mark_finishing_handler
-from omapp.core import mark_error_handler
+# coding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
+
 import logging
+
+from django_states.fields import StateField
+from django_states.machine import (StateDefinition, StateMachine,
+                                   StateTransition)
+from django_states.models import StateModel
+
+from omapp.core import (mark_bootstrapping_handler, mark_collecting_handler,
+                        mark_configuring_handler, mark_deploying_handler,
+                        mark_error_handler, mark_executing_handler,
+                        mark_finishing_handler)
 
 
 class ExecutionStateMachine(StateMachine):

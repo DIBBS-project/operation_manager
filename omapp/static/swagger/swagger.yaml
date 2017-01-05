@@ -27,7 +27,7 @@ paths:
     get:
       summary: Get the list of all the process instances registered.
       description: |
-        Get the list of all the process instances registered. No authentification is required.
+        Get the list of all the process instances registered. No authentication is required.
       tags:
         - Instances
       responses:
@@ -44,7 +44,7 @@ paths:
     post:
       summary: Register a new process instance.
       description: |
-        Register a new process instance. Authentification is required.
+        Register a new process instance. Authentication is required.
       security:
         - basic: []
         - api_key: []
@@ -71,7 +71,7 @@ paths:
     get:
       summary: Get a single process instance.
       description: |
-        Get a single process instance. Authentification is required.
+        Get a single process instance. Authentication is required.
       parameters:
         - name: id
           in: path
@@ -97,7 +97,7 @@ paths:
     put:
       summary: Redefine an already existing process instance.
       description: |
-        Redefine an already existing process instance. Authentification is required.
+        Redefine an already existing process instance. Authentication is required.
       security:
         - basic: []
         - api_key: []
@@ -133,7 +133,7 @@ paths:
     patch:
       summary: Modify an already existing process instance.
       description: |
-        Modify an already existing process instance. Authentification is required.
+        Modify an already existing process instance. Authentication is required.
       security:
         - basic: []
         - api_key: []
@@ -169,7 +169,7 @@ paths:
     delete:
       summary: Delete an already existing process instance.
       description: |
-        Delete an already existing process instance. Authentification is required.
+        Delete an already existing process instance. Authentication is required.
       parameters:
         - name: id
           in: path
@@ -197,7 +197,7 @@ paths:
     get:
       summary: Get the list of all the executions registered.
       description: |
-        Get the list of all the executions registered. No authentification is required.
+        Get the list of all the executions registered. No authentication is required.
       tags:
         - Executions
       responses:
@@ -214,7 +214,7 @@ paths:
     post:
       summary: Register a new execution.
       description: |
-        Register a new execution. Authentification is required.
+        Register a new execution. Authentication is required.
       security:
         - basic: []
         - api_key: []
@@ -241,7 +241,7 @@ paths:
     get:
       summary: Get a single execution.
       description: |
-        Get a single execution. Authentification is required.
+        Get a single execution. Authentication is required.
       parameters:
         - name: id
           in: path
@@ -267,7 +267,7 @@ paths:
     put:
       summary: Redefine an already existing execution.
       description: |
-        Redefine an already existing execution. Authentification is required.
+        Redefine an already existing execution. Authentication is required.
       security:
         - basic: []
         - api_key: []
@@ -303,7 +303,7 @@ paths:
     patch:
       summary: Modify an already existing execution.
       description: |
-        Modify an already existing execution. Authentification is required.
+        Modify an already existing execution. Authentication is required.
       security:
         - basic: []
         - api_key: []
@@ -339,7 +339,7 @@ paths:
     delete:
       summary: Delete an already existing execution.
       description: |
-        Delete an already existing execution. Authentification is required.
+        Delete an already existing execution. Authentication is required.
       parameters:
         - name: id
           in: path
@@ -404,7 +404,7 @@ paths:
     get:
       summary: Get the list of all the users.
       description: |
-        Get the list of all the users. No authentification is required.
+        Get the list of all the users. No authentication is required.
       tags:
         - Users
       responses:
@@ -422,7 +422,7 @@ paths:
     get:
       summary: Get a single user.
       description: |
-        Get a single user. No authentification is required.
+        Get a single user. No authentication is required.
       parameters:
         - name: id
           in: path
@@ -447,9 +447,9 @@ paths:
             $ref: '#/definitions/Error'
   /api-token-auth/:
     post:
-      summary: Get the authentification token for a user.
+      summary: Get the authentication token for a user.
       description: |
-        Get the authentification token for a user by providing his username and password. No authentification is required; however the credentials of the user are part of the request.
+        Get the authentication token for a user by providing his username and password. No authentication is required; however the credentials of the user are part of the request.
       parameters:
         - name: data
           in: body
@@ -461,7 +461,7 @@ paths:
         - Users
       responses:
         200:
-          description: The authentification token of the user
+          description: The authentication token of the user
           schema:
             $ref: '#/definitions/TokenResp'
         default:

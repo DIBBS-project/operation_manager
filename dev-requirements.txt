@@ -1,0 +1,12 @@
+codecov
+coverage
+invoke
+mock
+nose
+pathlib
+pip>=9.0.1
+requests-mock
+twine
+wheel
+
+-r requirements.txt

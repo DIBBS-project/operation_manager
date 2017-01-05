@@ -1,9 +1,10 @@
-# Create your tasks here
-from __future__ import absolute_import, unicode_literals
-from celery import shared_task, group
+# coding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
+
+from celery import shared_task
 from celery.utils.log import get_task_logger
-from omapp.models import Execution
-import threading
+
+from .models import Execution
 
 logger = get_task_logger("operation_manager")
 
@@ -13,6 +14,7 @@ def check_operations_periodically():
     print("checking executions")
     executions = Execution.objects.filter(ongoing_transition=False).all()
     executions = filter(lambda x: x.operation_state not in ["error", "finished"], executions)
+    # exections = [e for e in executions if e.operation_state not in [...]]
     if len(executions) > 0:
         execution = executions[0]
         execution.ongoing_transition = True

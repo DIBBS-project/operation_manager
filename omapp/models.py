@@ -1,17 +1,17 @@
-from django.db import models
-from django.contrib.auth.models import User
-
+# coding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
 
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
-from jsonfield import JSONField
-
-from fsm.fsm import ExecutionStateMachine
-from django_states.models import StateModel
 from django_states.fields import StateField
-# Create your models here.
+from django_states.models import StateModel
+from jsonfield import JSONField
+from rest_framework.authtoken.models import Token
+
+from .fsm.fsm import ExecutionStateMachine
 
 JSON_EMPTY = '{}'
 
@@ -50,4 +50,4 @@ class Execution(StateModel):
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
-        Token.objects.create(author=instance)
+        Token.objects.create(user=instance)

@@ -1,7 +1,12 @@
-from __future__ import absolute_import, unicode_literals
+# coding: utf-8
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
+
 from celery import Celery
 from celery.schedules import crontab
+
+from omapp.tasks import check_operations_periodically
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'operation_manager.settings')
@@ -26,7 +31,5 @@ def setup_periodic_tasks(sender, **kwargs):
 
 @app.task(bind=True)
 def periodic_task(self):
-    from omapp.tasks import check_operations_periodically
-
     print("Calling check_operations_periodically task")
     check_operations_periodically()
