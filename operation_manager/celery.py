@@ -2,6 +2,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'operation_manager.settings')
 
 from celery import Celery
 from celery.schedules import crontab
@@ -9,7 +10,6 @@ from celery.schedules import crontab
 from omapp.tasks import check_operations_periodically
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'operation_manager.settings')
 
 app = Celery('operation_manager')
 
