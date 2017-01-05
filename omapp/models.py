@@ -13,8 +13,6 @@ from rest_framework.authtoken.models import Token
 
 from .fsm.fsm import ExecutionStateMachine
 
-JSON_EMPTY = '{}'
-
 
 class Instance(models.Model):
     author = models.ForeignKey('auth.User', related_name='operation_instances', on_delete=models.CASCADE)
@@ -39,7 +37,6 @@ class Execution(StateModel):
     output_location = models.CharField(max_length=2048, blank=True, default='')
     hints = models.CharField(max_length=2048, blank=True, default='{}')
     cluster_id = models.IntegerField(default=-1)
-    resource_manager_credentials = models.CharField(max_length=2048, default=JSON_EMPTY)
     resource_manager_agent_credentials = models.CharField(max_length=2048, blank=True, default='{}')
     operation_manager_agent_credentials = models.CharField(max_length=2048, blank=True, default='{}')
 

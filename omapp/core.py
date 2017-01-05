@@ -104,21 +104,16 @@ def create_temporary_user(cluster, execution):
     execution.status_info = ""
     execution.save()
 
-    credentials = json.loads(execution.resource_manager_credentials)
-    if not credentials:
-        logging.info("creating a temporary user on cluster %s" % (cluster.name,))
+    logging.info("creating a temporary user on cluster %s" % (cluster.name,))
 
-        execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
-        execution.save()
+    execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
+    execution.save()
 
-        credentials = clients.clusters.clusters_id_new_account_post(cluster_id).to_dict()
-        execution.resource_manager_credentials = json.dumps(credentials)
+    credentials = clients.clusters.clusters_id_new_account_post(cluster_id).to_dict()
+    execution.resource_manager_credentials = json.dumps(credentials)
 
-        execution.status_info = "Temporary user created"
-        execution.save()
-    else:
-        logging.info("reusing stored temporary user '{}' on cluster {}".format(
-            credentials['username'], cluster.name))
+    execution.status_info = "Temporary user created"
+    execution.save()
 
     return credentials
 
