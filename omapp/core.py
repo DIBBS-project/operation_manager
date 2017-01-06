@@ -348,6 +348,7 @@ def mark_collecting_handler(transition, execution, user):
         return
 
     # Download the "output.txt" file
+    logger.info("Getting output file")
     execution.status = "COLLECTING"
     execution.status_info = "Getting output file"
     execution.save()
