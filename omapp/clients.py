@@ -1,11 +1,10 @@
 # coding: utf-8
 '''
-Clients. They don't need any reconfiguring, so just one & done 'em.
+Clients. They don't need any reconfiguring (apart from maybe the agent
+clients?), so just one & done 'em.
 '''
 
 from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
-from common_dibbs.clients.oma_client.api_client import ApiClient
-from common_dibbs.clients.oma_client.apis import OpsApi, UsersApi
 from common_dibbs.clients.or_client.apis import (OperationsApi,
                                                  OperationVersionsApi)
 from common_dibbs.clients.rm_client.apis import (ClusterDefinitionsApi,

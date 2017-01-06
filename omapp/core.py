@@ -11,9 +11,11 @@ import time
 import traceback
 import uuid
 
-import requests
+# from common_dibbs.clients.oma_client.api_client import ApiClient
+from common_dibbs.clients.oma_client.apis import OpsApi, UsersApi
 from common_dibbs.clients.rm_client.rest import ApiException as RmApiException
 from common_dibbs.misc import configure_basic_authentication
+import requests
 from requests.exceptions import ConnectionError
 from rest_framework import status
 from rest_framework.response import Response
