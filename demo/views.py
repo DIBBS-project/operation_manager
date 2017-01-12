@@ -1,22 +1,26 @@
-from django.shortcuts import render
-import omapp.models as models
-from common_dibbs.clients.or_client.apis import OperationsApi, OperationVersionsApi
-from common_dibbs.clients.or_client.apis.operations_api import OperationsApi
-from settings import Settings
+# coding: utf-8
+from __future__ import absolute_import, print_function
 
 import re
 import json
+
+from django.conf import settings
+from django.shortcuts import render
+
+from common_dibbs.clients.or_client.apis import OperationsApi, OperationVersionsApi
+from common_dibbs.clients.or_client.apis.operations_api import OperationsApi
 from common_dibbs.misc import configure_basic_authentication
+
+import omapp.models as models
 
 
 # Index that provides a description of the API
 def index(request):
-    settings = Settings()
     urls = {
-        'appliance_registry': re.sub('^https?://', '//', settings.appliance_registry_url),
-        'operation_registry': re.sub('^https?://', '//', settings.operation_registry_url),
-        'operation_manager': re.sub('^https?://', '//', settings.operation_manager_url),
-        'resource_manager': re.sub('^https?://', '//', settings.resource_manager_url)
+        'appliance_registry': re.sub('^https?://', '//', settings.DIBBS['urls']['ar']),
+        'operation_registry': re.sub('^https?://', '//', settings.DIBBS['urls']['or']),
+        'operation_manager': re.sub('^https?://', '//', settings.DIBBS['urls']['om']),
+        'resource_manager': re.sub('^https?://', '//', settings.DIBBS['urls']['rm'])
     }
     return render(request, "index.html", {'urls': urls})
 
@@ -24,7 +28,7 @@ def index(request):
 def operation_instances(request):
     # Configure a client for Operations
     operations_client = OperationsApi()
-    operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    operations_client.api_client.host = settings.DIBBS['urls']['or']
     configure_basic_authentication(operations_client, "admin", "pass")
 
     tuples = []
@@ -54,12 +58,12 @@ def executions(request):
 
     # Configure a client for OperationVersions
     operation_versions_client = ProcessImplementationsApi()
-    operation_versions_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    operation_versions_client.api_client.host = settings.DIBBS['urls']['or']
     configure_basic_authentication(operation_versions_client, "admin", "pass")
 
     # Configure a client for OperationDefinitions
     operations_client = OperationsApi()
-    operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    operations_client.api_client.host = settings.DIBBS['urls']['or']
     configure_basic_authentication(operations_client, "admin", "pass")
 
     tuples = []
@@ -82,12 +86,12 @@ def show_details(request, pk):
 
     # Configure a client for OperationVersions
     operation_versions_client = ProcessImplementationsApi()
-    operation_versions_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    operation_versions_client.api_client.host = settings.DIBBS['urls']['or']
     configure_basic_authentication(operation_versions_client, "admin", "pass")
 
     # Configure a client for OperationDefinitions
     operations_client = OperationsApi()
-    operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    operations_client.api_client.host = settings.DIBBS['urls']['or']
     configure_basic_authentication(operations_client, "admin", "pass")
 
     process_impl = operation_versions_client.processimpls_id_get(id=execution.operation_instance.process_definition_id)
@@ -105,7 +109,7 @@ def show_details(request, pk):
 def create_operation_instance(request):
     # Configure a client for OperationDefinitions
     operations_client = OperationsApi()
-    operations_client.api_client.host = "%s" % (Settings.operation_registry_url,)
+    operations_client.api_client.host = settings.DIBBS['urls']['or']
     configure_basic_authentication(operations_client, "admin", "pass")
 
     processdefs = operations_client.processdefs_get()

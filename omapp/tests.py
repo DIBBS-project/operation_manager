@@ -16,10 +16,7 @@ import requests_mock
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, APIClient
 
-import settings
 from . import clients, models, tasks
-
-SETTINGS = settings.Settings()
 
 
 class AttrDict(dict):

@@ -7,11 +7,7 @@ import logging
 import time
 import traceback
 
-from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
-from common_dibbs.clients.or_client.apis import (OperationsApi,
-                                                 OperationVersionsApi)
-from common_dibbs.clients.rm_client.apis import CredentialsApi
-from common_dibbs.misc import configure_basic_authentication
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from requests.exceptions import ConnectionError
@@ -20,10 +16,15 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
+from common_dibbs.clients.or_client.apis import (OperationsApi,
+                                                 OperationVersionsApi)
+from common_dibbs.clients.rm_client.apis import CredentialsApi
+from common_dibbs.misc import configure_basic_authentication
+
 from .models import Execution, Instance
 from .serializers import (ExecutionSerializer, InstanceSerializer,
                                UserSerializer)
-from settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ class InstanceViewSet(viewsets.ModelViewSet):
 
         # Create a client for Operations
         operations_client = OperationsApi()
-        operations_client.api_client.host = "%s" % (Settings().operation_registry_url,)
+        operations_client.api_client.host = settings.DIBBS['urls']['or']
         configure_basic_authentication(operations_client, "admin", "pass")
 
         # Check that the process definition exists

@@ -12,7 +12,7 @@ import traceback
 import uuid
 
 # from common_dibbs.clients.oma_client.api_client import ApiClient
-from common_dibbs.clients.oma_client.apis import OpsApi, UsersApi
+from common_dibbs.clients.oma_client.apis import OpsApi
 from common_dibbs.clients.rm_client.rest import ApiException as RmApiException
 from common_dibbs.misc import configure_basic_authentication
 import requests
@@ -378,7 +378,7 @@ def mark_collecting_handler(transition, execution, user):
                 "password": temporary_password
             }
             r = requests.get('http://%s:8000/generate_new_token/' % (cluster.master_node_ip), headers=headers)
-            print (r)
+            print(r)
             token = r.json()["token"]
 
             # Downloads the output
