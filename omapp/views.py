@@ -128,15 +128,3 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-@api_view(['GET'])
-@csrf_exempt
-def run_execution(request, pk):
-    return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
-
-
-@csrf_exempt
-def noop(request, *args, **kwargs):
-    """Takes everything, does nothing."""
-    return Response({"status": None})
