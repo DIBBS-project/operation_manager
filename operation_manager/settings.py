@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'omapp',
     #'demo',
     'django_states',
-    'periodically',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -57,7 +56,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'common_dibbs.auth.auth.CentralAuthenticationMiddleware'
+    'common_dibbs.CentralAuthenticationMiddleware',
+    'common_dibbs.DibbsUserMiddleware',
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 

@@ -5,7 +5,6 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'operation_manager.settings')
 
 from celery import Celery
-from celery.schedules import crontab
 
 from omapp.tasks import check_operations_periodically
 
@@ -25,7 +24,6 @@ app.autodiscover_tasks()
 
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    # Calls test('hello') every 10 seconds.
     sender.add_periodic_task(10.0, periodic_task.s(), name='add every 10')
 
 
