@@ -134,3 +134,9 @@ class ExecutionViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 def run_execution(request, pk):
     return Response({"status": "success"}, status=status.HTTP_202_ACCEPTED)
+
+
+@csrf_exempt
+def noop(request, *args, **kwargs):
+    """Takes everything, does nothing."""
+    return Response({"status": None})
