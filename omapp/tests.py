@@ -29,7 +29,7 @@ class AttrDict(dict):
 def disable_remote_auth(test):
     test = modify_settings(MIDDLEWARE_CLASSES={
         'remove': [
-            'common_dibbs.auth.auth.CentralAuthenticationMiddleware',
+            'common_dibbs.auth.CentralAuthenticationMiddleware',
         ],
     })(test)
     return test

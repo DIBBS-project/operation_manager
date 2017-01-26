@@ -11,16 +11,18 @@ import time
 import traceback
 import uuid
 
+from common_dibbs.auth import swagger_basic_auth
 # from common_dibbs.clients.oma_client.api_client import ApiClient
 from common_dibbs.clients.oma_client.apis import OpsApi
 from common_dibbs.clients.rm_client.rest import ApiException as RmApiException
-from common_dibbs.misc import configure_basic_authentication
+from common_dibbs.django import relay_swagger
+
 import requests
 from requests.exceptions import ConnectionError
 from rest_framework import status
 from rest_framework.response import Response
 
-from . import clients
+from . import remote
 from .process_record import set_variables, set_files, fileneames_dictionary, get_bash_script
 from .sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 
@@ -35,8 +37,8 @@ from .sched.scheduling_policies import DummySchedulingPolicy as SchedulingPolicy
 logger = logging.getLogger(__name__)
 
 
-def filter_clusters_in_site(clusters, hints):
-    all_credentials = clients.credentials.credentials_get()
+def filter_clusters_in_site(clusters, hints, user):
+    all_credentials = remote.credentials_get(user.username)
 
     # Find the sites that can be used by the used (i.e. sites where user has credentials)
     sites = []
@@ -56,14 +58,14 @@ def filter_clusters_in_site(clusters, hints):
     for cluster in clusters:
         if cluster.appliance_impl == "":
             continue
-        appliance_impl = clients.appliance_implementations.appliances_impl_name_get(cluster.appliance_impl)
+        appliance_impl = remote.appliances_impl_name_get(cluster.appliance_impl, user.username)
         # Detect the site of the cluster (Site <--> ApplianceImpl <--> Cluster)
         if appliance_impl.site in sites or "*" in credentials:
             results += [cluster]
     return results
 
 
-def deploy_cluster(execution, appliance, hints=None):
+def deploy_cluster(execution, appliance, user, hints=None):
     execution.status = "DEPLOYING"
     execution.status_info = "Creating virtual cluster"
     execution.save()
@@ -86,7 +88,7 @@ def deploy_cluster(execution, appliance, hints=None):
         cluster_creation_data["hints"] = json.dumps(hints)
 
     # HINT INSERTION: Add a hint to this function to help to chose the right site
-    response = clients.clusters.clusters_post(data=cluster_creation_data)
+    response = remote.clusters_post(cluster_creation_data, user.username)
     cluster_id = response.id
 
     execution.status = "DEPLOYED"
@@ -95,13 +97,13 @@ def deploy_cluster(execution, appliance, hints=None):
 
     # Get the cluster description
     logger.info("get a description of the cluster %s" % cluster_id)
-    description = clients.clusters.clusters_id_get(id=cluster_id)
+    description = remote.clusters_id_get(cluster_id, user.username)
 
     logger.info("description will be returned %s" % description)
     return description
 
 
-def create_temporary_user(cluster, execution):
+def create_temporary_user(cluster, execution, user):
     cluster_id = cluster.id if not isinstance(cluster, dict) else cluster["id"]
 
     execution.status = "PREPARING"
@@ -113,7 +115,7 @@ def create_temporary_user(cluster, execution):
     execution.status_info = "Creating a temporary user on cluster %s" % (cluster.name,)
     execution.save()
 
-    credentials = clients.clusters.clusters_id_new_account_post(cluster_id).to_dict()
+    credentials = remote.clusters_id_new_account_post(cluster_id, user.username).to_dict()
     execution.resource_manager_credentials = json.dumps(credentials)
 
     execution.status_info = "Temporary user created"
@@ -132,7 +134,7 @@ def run_process(cluster, script, callback_url, execution, credentials):
     username = credentials.username if not isinstance(credentials, dict) else credentials["username"]
     password = credentials.password if not isinstance(credentials, dict) else credentials["password"]
 
-    configure_basic_authentication(ops_client, username, password)
+    swagger_basic_auth(ops_client, username, password)
 
     # Create an operation, and post it to the Operation Manager Agent running on port 8011 on the
     # master node
@@ -185,10 +187,10 @@ def mark_deploying_handler(transition, execution, user):
 
         # Check that the process definition exists
         operation_instance = execution.operation_instance
-        operation = clients.operations.operations_id_get(id=operation_instance.process_definition_id)
+        operation = remote.operations_id_get(operation_instance.process_definition_id, user.username)
 
         operation_version_id = operation.implementations[0]
-        operation_version = clients.operation_versions.operationversions_id_get(id=operation_version_id)
+        operation_version = remote.operationversions_id_get(operation_version_id, user.username)
 
         # Get all the required information
         appliance = operation_version.appliance
@@ -201,16 +203,16 @@ def mark_deploying_handler(transition, execution, user):
 
     try:
         # Call Mr Cluster
-        clusters = clients.clusters.clusters_get()
+        clusters = remote.clusters_get(user.username)
         hints = None
         if execution.hints != "{}":
             hints = json.loads(execution.hints)
-            clusters = filter_clusters_in_site(clusters, hints)
+            clusters = filter_clusters_in_site(clusters, hints, user)
         # HINT INSERTION: Here we could use hints to select the right cluster
         cluster_to_use = SchedulingPolicy().decide_cluster_deployment(appliance, clusters, force_new=execution.force_spawn_cluster!='', hints=hints)
         if cluster_to_use is None:
             logger.info("Creating a virtual cluster")
-            cluster_to_use = deploy_cluster(execution, appliance, hints=hints)
+            cluster_to_use = deploy_cluster(execution, appliance, user, hints=hints)
             print("cluster_to_user: %s" % (cluster_to_use))
             execution.cluster_id = cluster_to_use.id
             execution.save()
@@ -225,8 +227,13 @@ def mark_deploying_handler(transition, execution, user):
 
 
 def mark_bootstrapping_handler(transition, execution, user):
-    clusters = clients.clusters.clusters_get()
-    cluster_to_use = filter(lambda c: c.id == execution.cluster_id, clusters)[0]
+    clusters = remote.clusters_get(user.username)
+    try:
+        # get first matching with next(gen)
+        cluster_to_use = next(c for c in clusters if c.id == execution.cluster_id)
+    except StopIteration:
+        logger.warning('no cluster matching execution')
+        return
 
     retry_count = 0
     max_retry = 100
@@ -234,7 +241,7 @@ def mark_bootstrapping_handler(transition, execution, user):
     while not credentials and retry_count < max_retry:
         try:
             logger.info("Creating a temporary user on the cluster %s" % cluster_to_use)
-            credentials = create_temporary_user(cluster_to_use, execution)
+            credentials = create_temporary_user(cluster_to_use, execution, user)
             credentials_json = json.dumps(credentials)
             execution.resource_manager_agent_credentials = credentials_json
             execution.save()
@@ -259,12 +266,12 @@ def mark_bootstrapping_handler(transition, execution, user):
 def mark_configuring_handler(transition, execution, user):
     # Check that the process definition exists
     operation_instance = execution.operation_instance
-    operation = clients.operations.operations_id_get(id=operation_instance.process_definition_id)
+    operation = remote.operations_id_get(operation_instance.process_definition_id, user.username)
 
     # FIXME: the chosen process implementation is always the first one
     # UPDATE: New architecture: No process implementation but process version, it will be fixed when changing this
     operation_version_id = operation.implementations[0]
-    operation_version = clients.operation_versions.operationversions_id_get(id=operation_version_id)
+    operation_version = remote.operationversions_id_get(operation_version_id, user.username)
 
     # Prevent the operation manager to crash if the user provided an empty non JSON output
     # parameter
@@ -286,12 +293,12 @@ def mark_executing_handler(transition, execution, user):
     try:
         # Check that the process definition exists
         operation_instance = execution.operation_instance
-        operation = clients.operations.operations_id_get(id=operation_instance.process_definition_id)
+        operation = remote.operations_id_get(operation_instance.process_definition_id, user.username)
 
         # FIXME: the chosen process implementation is always the first one
         # UPDATE: New architecture: No process implementation but process version, it will be fixed when changing this
         operation_version_id = operation.implementations[0]
-        operation_version = clients.operation_versions.operationversions_id_get(id=operation_version_id)
+        operation_version = remote.operationversions_id_get(operation_version_id, user.username)
 
         if operation_version.output_parameters == "":
             operation_version.output_parameters = {}
@@ -309,7 +316,7 @@ def mark_executing_handler(transition, execution, user):
         script = get_bash_script(operation_version, files, filenames)
         callback_url = execution.callback_url
 
-        clusters = clients.clusters.clusters_get()
+        clusters = remote.clusters_get(user.username)
         cluster_to_use = filter(lambda c: c.id == execution.cluster_id, clusters)[0]
 
         credentials_unicode = execution.resource_manager_agent_credentials
@@ -354,11 +361,11 @@ def mark_collecting_handler(transition, execution, user):
     execution.save()
 
     # Check that the process definition exists
-    operation_version = clients.operation_versions.operationversions_id_get(id=execution.operation_instance_id)
+    operation_version = remote.operationversions_id_get(execution.operation_instance_id, user.username)
     output_file_path = None
     output_file_name = None
     if operation_version.output_type == "file":
-        cluster = clients.clusters.clusters_id_get(execution.cluster_id)
+        cluster = remote.clusters_id_get(execution.cluster_id, user.username)
         logger.info("I will process the output of this execution by using these credentials %s" % (execution.operation_manager_agent_credentials))
         output_parameters = json.loads(operation_version.output_parameters)
         output_file_name = output_parameters.get("file_path", None)

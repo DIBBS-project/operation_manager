@@ -29,5 +29,5 @@ def setup_periodic_tasks(sender, **kwargs):
 
 @app.task(bind=True)
 def periodic_task(self):
-    print("Calling check_operations_periodically task")
+    # print("Calling check_operations_periodically task")
     check_operations_periodically()

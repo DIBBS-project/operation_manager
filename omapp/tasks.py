@@ -1,6 +1,8 @@
 # coding: utf-8
 from __future__ import absolute_import, print_function, unicode_literals
 
+import traceback
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
@@ -11,7 +13,7 @@ logger = get_task_logger("operation_manager")
 
 @shared_task
 def check_operations_periodically():
-    print("checking executions")
+    # print("checking executions")
     executions = Execution.objects.filter(ongoing_transition=False).all()
     executions = filter(lambda x: x.operation_state not in ["error", "finished"], executions)
     # exections = [e for e in executions if e.operation_state not in [...]]
@@ -24,23 +26,27 @@ def check_operations_periodically():
 
 @shared_task
 def process_execution_state(execution_pk):
-    print("checking execution %s" % (execution_pk))
     execution = Execution.objects.get(id=execution_pk)
-    print(execution.operation_state)
-    print(execution.get_operation_state_info())
-    possible_transitions = filter(lambda x: x.to_state != "error", execution.get_operation_state_info().possible_transitions)
-    print(possible_transitions)
+    # possible_transitions = filter(lambda x: x.to_state != "error", execution.get_operation_state_info().possible_transitions)
+    state_info = execution.get_operation_state_info()
+
+    possible_transitions = [t for t in state_info.possible_transitions if t.to_state != 'error']
+
+    print("Execution '{}' is in state '{}', can go to {}".format(
+        execution_pk, execution.operation_state,
+        [t.get_name() for t in possible_transitions],
+    ))
 
     try:
         if len(possible_transitions) > 0:
-            # Make the transition
+            # Make a transition
             chosen_transition = possible_transitions[0]
-            print("doing the transition to %s" % (chosen_transition.get_name()))
-            execution.get_operation_state_info().make_transition(chosen_transition.get_name())
+            print("Commanding transition of execution '{}' to '{}'".format(
+                execution_pk, chosen_transition.get_name(),
+            ))
+            state_info.make_transition(chosen_transition.get_name(), user=execution.author)
     except Exception as e:
-        print(e)
-        print("recovering an error")
-        pass
+        print(traceback.format_exc())
     finally:
         execution.ongoing_transition = False
         execution.save()

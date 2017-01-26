@@ -20,11 +20,12 @@ from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
 from common_dibbs.clients.or_client.apis import (OperationsApi,
                                                  OperationVersionsApi)
 from common_dibbs.clients.rm_client.apis import CredentialsApi
-from common_dibbs.misc import configure_basic_authentication
+from common_dibbs.django import relay_swagger
 
 from .models import Execution, Instance
-from .serializers import (ExecutionSerializer, InstanceSerializer,
-                               UserSerializer)
+from .serializers import ExecutionSerializer, InstanceSerializer
+# from .serializers import UserSerializer
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,17 +33,17 @@ logger = logging.getLogger(__name__)
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
-        'users': reverse('user-list', request=request, format=format),
+        # 'users': reverse('user-list', request=request, format=format),
         'executions': reverse('execution-list', request=request, format=format)
     })
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    This viewset automatically provides `list` and `detail` actions.
-    """
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+# class UserViewSet(viewsets.ReadOnlyModelViewSet):
+#     """
+#     This viewset automatically provides `list` and `detail` actions.
+#     """
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
 
 
 class InstanceViewSet(viewsets.ModelViewSet):
@@ -63,7 +64,7 @@ class InstanceViewSet(viewsets.ModelViewSet):
         data2 = {}
         for key in request.data:
             data2[key] = request.data[key]
-        data2[u'author'] = request.user.id
+        data2[u'author'] = request.user.username
         data2[u'executions'] = {}
         serializer = self.get_serializer(data=data2)
         serializer.is_valid(raise_exception=True)
@@ -71,7 +72,7 @@ class InstanceViewSet(viewsets.ModelViewSet):
         # Create a client for Operations
         operations_client = OperationsApi()
         operations_client.api_client.host = settings.DIBBS['urls']['or']
-        configure_basic_authentication(operations_client, "admin", "pass")
+        relay_swagger(operations_client, request)
 
         # Check that the process definition exists
         process_definition_id = data2[u'process_definition_id']
@@ -82,13 +83,13 @@ class InstanceViewSet(viewsets.ModelViewSet):
         if data2[u'parameters']:
             try:
                 json.loads(data2[u'parameters'])
-            except:
+            except ValueError:
                 return Response({"error": "Invalid format for parameters"}, status=status.HTTP_400_BAD_REQUEST)
 
         if data2[u'files']:
             try:
                 json.loads(data2[u'files'])
-            except:
+            except ValueError:
                 return Response({"error": "Invalid format for files"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Save in the database
@@ -118,7 +119,7 @@ class ExecutionViewSet(viewsets.ModelViewSet):
             data2[key] = request.data[key]
         data2[u'status'] = "PENDING"
         data2[u'status_info'] = ""
-        data2[u'author'] = request.user.id
+        data2[u'author'] = request.user.username
         data2[u'output_location'] = ""
         serializer = self.get_serializer(data=data2)
         serializer.is_valid(raise_exception=True)

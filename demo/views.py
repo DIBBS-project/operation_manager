@@ -9,7 +9,8 @@ from django.shortcuts import render
 
 from common_dibbs.clients.or_client.apis import OperationsApi, OperationVersionsApi
 from common_dibbs.clients.or_client.apis.operations_api import OperationsApi
-from common_dibbs.misc import configure_basic_authentication
+from common_dibbs.django import relay_swagger
+
 
 import omapp.models as models
 
@@ -29,7 +30,7 @@ def operation_instances(request):
     # Configure a client for Operations
     operations_client = OperationsApi()
     operations_client.api_client.host = settings.DIBBS['urls']['or']
-    configure_basic_authentication(operations_client, "admin", "pass")
+    relay_swagger(operations_client, request)
 
     tuples = []
 
@@ -59,12 +60,12 @@ def executions(request):
     # Configure a client for OperationVersions
     operation_versions_client = ProcessImplementationsApi()
     operation_versions_client.api_client.host = settings.DIBBS['urls']['or']
-    configure_basic_authentication(operation_versions_client, "admin", "pass")
+    relay_swagger(operation_versions_client, request)
 
     # Configure a client for OperationDefinitions
     operations_client = OperationsApi()
     operations_client.api_client.host = settings.DIBBS['urls']['or']
-    configure_basic_authentication(operations_client, "admin", "pass")
+    relay_swagger(operations_client, request)
 
     tuples = []
     for execution in executions_list:
@@ -87,12 +88,12 @@ def show_details(request, pk):
     # Configure a client for OperationVersions
     operation_versions_client = ProcessImplementationsApi()
     operation_versions_client.api_client.host = settings.DIBBS['urls']['or']
-    configure_basic_authentication(operation_versions_client, "admin", "pass")
+    relay_swagger(operation_versions_client, request)
 
     # Configure a client for OperationDefinitions
     operations_client = OperationsApi()
     operations_client.api_client.host = settings.DIBBS['urls']['or']
-    configure_basic_authentication(operations_client, "admin", "pass")
+    relay_swagger(operations_client, request)
 
     process_impl = operation_versions_client.processimpls_id_get(id=execution.operation_instance.process_definition_id)
     process_def = operations_client.processdefs_id_get(id=process_impl.process_definition)
@@ -110,7 +111,7 @@ def create_operation_instance(request):
     # Configure a client for OperationDefinitions
     operations_client = OperationsApi()
     operations_client.api_client.host = settings.DIBBS['urls']['or']
-    configure_basic_authentication(operations_client, "admin", "pass")
+    relay_swagger(operations_client, request)
 
     processdefs = operations_client.processdefs_get()
     return render(request, "operation_instance_form.html", {"processdefs": processdefs})

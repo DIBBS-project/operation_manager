@@ -4,16 +4,25 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 
 from django_states.fields import StateField
-from django_states.machine import (StateDefinition, StateMachine,
-                                   StateTransition)
+from django_states.machine import StateDefinition, StateMachine, StateTransition
 from django_states.models import StateModel
 
-from omapp.core import (mark_bootstrapping_handler, mark_collecting_handler,
-                        mark_configuring_handler, mark_deploying_handler,
-                        mark_error_handler, mark_executing_handler,
-                        mark_finishing_handler)
+from omapp import core
 
 logger = logging.getLogger(__name__)
+
+
+class EUArticle45Mixin(object):
+    """
+    "Freedom of movement for workers shall be secured within the Community."
+        - Article 45 of the Treaty on the Functioning of the European Union
+
+    Basically just let whoever command a state transition. I'm so clever at
+    naming things.
+    """
+    @classmethod
+    def has_permission(cls, instance, user):
+        return True
 
 
 class ExecutionStateMachine(StateMachine):
@@ -46,61 +55,61 @@ class ExecutionStateMachine(StateMachine):
         description = 'Execution error'
 
     # state transitions
-    class mark_deploying(StateTransition):
+    class mark_deploying(EUArticle45Mixin, StateTransition):
         from_state = 'initiated'
         to_state = 'deployed'
         description = 'Deploy the execution dependencies'
 
         def handler(transition, instance, user):
             logger.info("INITIATED => DEPLOYING")
-            mark_deploying_handler(transition, instance, user)
+            core.mark_deploying_handler(transition, instance, user)
 
-    class mark_bootstrapping(StateTransition):
+    class mark_bootstrapping(EUArticle45Mixin, StateTransition):
         from_state = 'deployed'
         to_state = 'bootstrapped'
         description = 'Bootstrap the execution of the operation'
 
         def handler(transition, instance, user):
             logger.info("DEPLOYING => BOOTSTRAPPED")
-            mark_bootstrapping_handler(transition, instance, user)
+            core.mark_bootstrapping_handler(transition, instance, user)
 
-    class mark_configuring(StateTransition):
+    class mark_configuring(EUArticle45Mixin, StateTransition):
         from_state = 'bootstrapped'
         to_state = 'configured'
         description = 'Configure the execution of the operation'
 
         def handler(transition, instance, user):
             logger.info("BOOTSTRAPPED => CONFIGURED")
-            mark_configuring_handler(transition, instance, user)
+            core.mark_configuring_handler(transition, instance, user)
 
-    class mark_executing(StateTransition):
+    class mark_executing(EUArticle45Mixin, StateTransition):
         from_state = 'configured'
         to_state = 'executed'
         description = 'Execute the operation'
 
         def handler(transition, instance, user):
             logger.info("CONFIGURED => EXECUTED")
-            mark_executing_handler(transition, instance, user)
+            core.mark_executing_handler(transition, instance, user)
 
-    class mark_collecting(StateTransition):
+    class mark_collecting(EUArticle45Mixin, StateTransition):
         from_state = 'executed'
         to_state = 'collected'
         description = 'Post execution'
 
         def handler(transition, instance, user):
             logger.info("EXECUTED => COLLECTED")
-            mark_collecting_handler(transition, instance, user)
+            core.mark_collecting_handler(transition, instance, user)
 
-    class mark_finishing(StateTransition):
+    class mark_finishing(EUArticle45Mixin, StateTransition):
         from_state = 'collected'
         to_state = 'finished'
         description = 'Finished the execution of the operation'
 
         def handler(transition, instance, user):
             logger.info("COLLECTED => FINISHED")
-            mark_finishing_handler(transition, instance, user)
+            core.mark_finishing_handler(transition, instance, user)
 
-    class mark_error(StateTransition):
+    class mark_error(EUArticle45Mixin, StateTransition):
         from_states = ('initiated', 'deployed', 'bootstrapped', 'configured', 'executed',
                        'collected', 'finished')
         to_state = 'error'
@@ -108,4 +117,4 @@ class ExecutionStateMachine(StateMachine):
 
         def handler(transition, instance, user):
             logger.info("* => ERROR")
-            mark_error_handler(transition, instance, user)
+            core.mark_error_handler(transition, instance, user)
