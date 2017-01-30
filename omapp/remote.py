@@ -17,6 +17,15 @@ from common_dibbs.clients.rm_client.apis import (ClusterDefinitionsApi,
 from common_dibbs.clients.rm_client.rest import ApiException as RmApiException
 from common_dibbs.django import get_request, relay_swagger
 
+#### to catch remote errors
+from common_dibbs.clients.ar_client.api_client import ApiException as ArApiException
+from common_dibbs.clients.om_client.api_client import ApiException as OmApiException
+from common_dibbs.clients.or_client.api_client import ApiException as OrApiException
+from common_dibbs.clients.rm_client.api_client import ApiException as RmApiException
+from common_dibbs.clients.oma_client.api_client import ApiException as OmaApiException
+from common_dibbs.clients.rma_client.api_client import ApiException as RmaApiException
+ApiException = (ArApiException, OmApiException, OrApiException, RmApiException, OmaApiException, RmaApiException)
+####
 
 def _attach_auth_header(client, obo_user=None):
     try:

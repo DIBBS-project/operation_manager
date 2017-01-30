@@ -22,6 +22,7 @@ from common_dibbs.clients.or_client.apis import (OperationsApi,
 from common_dibbs.clients.rm_client.apis import CredentialsApi
 from common_dibbs.django import relay_swagger
 
+from . import remote
 from .models import Execution, Instance
 from .serializers import ExecutionSerializer, InstanceSerializer
 # from .serializers import UserSerializer
@@ -64,20 +65,22 @@ class InstanceViewSet(viewsets.ModelViewSet):
         data2 = {}
         for key in request.data:
             data2[key] = request.data[key]
+        # data2 = request.data.copy()?
+
         data2[u'author'] = request.user.username
         data2[u'executions'] = {}
         serializer = self.get_serializer(data=data2)
         serializer.is_valid(raise_exception=True)
 
-        # Create a client for Operations
-        operations_client = OperationsApi()
-        operations_client.api_client.host = settings.DIBBS['urls']['or']
-        relay_swagger(operations_client, request)
-
         # Check that the process definition exists
-        process_definition_id = data2[u'process_definition_id']
-
-        operations_client.operations_id_get(id=process_definition_id)
+        try:
+            remote.operations_id_get(data2[u'process_definition_id'],
+                obo_user=request.user)
+        except remote.ApiException:
+            return Response(
+                {"error": "Process definition does not exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Check that the parameters are valid JSON
         if data2[u'parameters']:
