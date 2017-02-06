@@ -5,9 +5,11 @@ clients?), so just one & done 'em.
 '''
 from __future__ import absolute_import, print_function
 
+import logging
+
 from django.conf import settings
 
-from common_dibbs.auth import client_auth_headers
+from common_dibbs.django import obo_headers
 from common_dibbs.clients.ar_client.apis import ApplianceImplementationsApi
 from common_dibbs.clients.or_client.apis import (OperationsApi,
                                                  OperationVersionsApi)
@@ -17,15 +19,11 @@ from common_dibbs.clients.rm_client.apis import (ClusterDefinitionsApi,
 from common_dibbs.clients.rm_client.rest import ApiException as RmApiException
 from common_dibbs.django import get_request, relay_swagger
 
-#### to catch remote errors
-from common_dibbs.clients.ar_client.api_client import ApiException as ArApiException
-from common_dibbs.clients.om_client.api_client import ApiException as OmApiException
-from common_dibbs.clients.or_client.api_client import ApiException as OrApiException
-from common_dibbs.clients.rm_client.api_client import ApiException as RmApiException
-from common_dibbs.clients.oma_client.api_client import ApiException as OmaApiException
-from common_dibbs.clients.rma_client.api_client import ApiException as RmaApiException
-ApiException = (ArApiException, OmApiException, OrApiException, RmApiException, OmaApiException, RmaApiException)
-####
+from common_dibbs.clients import ApiException
+
+
+logger = logging.getLogger(__name__)
+
 
 def _attach_auth_header(client, obo_user=None):
     try:
@@ -34,7 +32,9 @@ def _attach_auth_header(client, obo_user=None):
         if obo_user is None:
             raise ValueError('no user specified and cannot access global request')
 
-        headers = client_auth_headers(obo_user)
+        headers = obo_headers(obo_user)
+        logger.info('constructed token on behalf of user "{}" -> "{}"'.format(
+            obo_user, headers))
         client.api_client.default_headers.update(headers)
     else:
         relay_swagger(client, request)
